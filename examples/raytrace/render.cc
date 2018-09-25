@@ -235,7 +235,7 @@ void FetchTexture(const Texture &texture, float u, float v, float* col) {
 
 bool Renderer::Render(float* rgba, float* aux_rgba, int* sample_counts,
 											float quat[4], 
-											const nanosg::Scene<float, Mesh> &scene,
+											const nanosg::Scene<Mesh> &scene,
 											const Asset &asset,
 											const RenderConfig& config,
 											std::atomic<bool>& cancelFlag,

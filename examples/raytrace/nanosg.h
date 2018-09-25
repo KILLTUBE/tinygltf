@@ -631,12 +631,12 @@ class NodeBBoxIntersector {
 	mutable int ray_dir_sign_[3];
 };
 
-template <typename T, class M>
+template <class M>
 class Scene {
  public:
 	Scene() {
-		bmin_[0] = bmin_[1] = bmin_[2] = std::numeric_limits<T>::max();
-		bmax_[0] = bmax_[1] = bmax_[2] = -std::numeric_limits<T>::max();
+		bmin_[0] = bmin_[1] = bmin_[2] = std::numeric_limits<float>::max();
+		bmax_[0] = bmax_[1] = bmax_[2] = -std::numeric_limits<float>::max();
 	}
 
 	~Scene() {}
@@ -682,15 +682,15 @@ class Scene {
 
 		// Update nodes.
 		for (size_t i = 0; i < nodes_.size(); i++) {
-			T ident[4][4];
-			Matrix<T>::Identity(ident);
+			float ident[4][4];
+			Matrix<float>::Identity(ident);
 
 			nodes_[i].Update(ident);
 		}
 
 		// Build toplevel BVH.
-		NodeBBoxGeometry<T, M> geom(&nodes_);
-		NodeBBoxPred<T, M> pred(&nodes_);
+		NodeBBoxGeometry<float, M> geom(&nodes_);
+		NodeBBoxPred<float, M> pred(&nodes_);
 
 		// FIXME(LTE): Limit one leaf contains one node bbox primitive. This would
 		// work, but would be inefficient.
@@ -712,13 +712,13 @@ class Scene {
 			toplevel_accel_.BoundingBox(bmin_, bmax_);
 		} else {
 			// Set invalid bbox value.
-			bmin_[0] = std::numeric_limits<T>::max();
-			bmin_[1] = std::numeric_limits<T>::max();
-			bmin_[2] = std::numeric_limits<T>::max();
+			bmin_[0] = std::numeric_limits<float>::max();
+			bmin_[1] = std::numeric_limits<float>::max();
+			bmin_[2] = std::numeric_limits<float>::max();
 
-			bmax_[0] = -std::numeric_limits<T>::max();
-			bmax_[1] = -std::numeric_limits<T>::max();
-			bmax_[2] = -std::numeric_limits<T>::max();
+			bmax_[0] = -std::numeric_limits<float>::max();
+			bmax_[1] = -std::numeric_limits<float>::max();
+			bmax_[2] = -std::numeric_limits<float>::max();
 		}
 
 		return ret;
@@ -727,7 +727,7 @@ class Scene {
 	///
 	/// Get the scene bounding box.
 	///
-	void GetBoundingBox(T bmin[3], T bmax[3]) const {
+	void GetBoundingBox(float bmin[3], float bmax[3]) const {
 		bmin[0] = bmin_[0];
 		bmin[1] = bmin_[1];
 		bmin[2] = bmin_[2];
@@ -743,8 +743,7 @@ class Scene {
 	/// Then, trace into the hit node to find the intersection of the primitive.
 	///
 	template <class H>
-	bool Traverse(nanort::Ray &ray, H *isect,
-								const bool cull_back_face = false) const {
+	bool Traverse(nanort::Ray &ray, H *isect, const bool cull_back_face = false) const {
 		if (!toplevel_accel_.IsValid()) {
 			return false;
 		}
@@ -753,14 +752,13 @@ class Scene {
 
 		bool has_hit = false;
 
-		NodeBBoxIntersector<T, M> isector(&nodes_);
+		NodeBBoxIntersector<float, M> isector(&nodes_);
 		nanort::StackVector<nanort::NodeHit, 128> node_hits;
-		bool may_hit = toplevel_accel_.ListNodeIntersections(ray, kMaxIntersections,
-																												 isector, &node_hits);
+		bool may_hit = toplevel_accel_.ListNodeIntersections(ray, kMaxIntersections, isector, &node_hits);
 
 		if (may_hit) {
-			T t_max = std::numeric_limits<T>::max();
-			T t_nearest = t_max;
+			float t_max = std::numeric_limits<float>::max();
+			float t_nearest = t_max;
 
 			nanort::BVHTraceOptions trace_options;
 			trace_options.cull_back_face = cull_back_face;
@@ -780,8 +778,8 @@ class Scene {
 				// Transform ray into node's local space
 				// TODO(LTE): Set ray tmin and tmax
 				nanort::Ray local_ray;
-				Matrix<T>::MultV(local_ray.org, node.inv_xform_, ray.org);
-				Matrix<T>::MultV(local_ray.dir, node.inv_xform33_, ray.dir);
+				Matrix<float>::MultV(local_ray.org, node.inv_xform_, ray.org);
+				Matrix<float>::MultV(local_ray.dir, node.inv_xform33_, ray.dir);
 
 				nanort::TriangleIntersector<H> triangle_intersector(
 						node.GetMesh()->vertices.data(), node.GetMesh()->faces.data(),
@@ -793,13 +791,13 @@ class Scene {
 
 				if (hit) {
 					// Calulcate hit distance in world coordiante.
-					T local_P[3];
+					float local_P[3];
 					local_P[0] = local_ray.org[0] + local_isect.t * local_ray.dir[0];
 					local_P[1] = local_ray.org[1] + local_isect.t * local_ray.dir[1];
 					local_P[2] = local_ray.org[2] + local_isect.t * local_ray.dir[2];
 
-					T world_P[3];
-					Matrix<T>::MultV(world_P, node.xform_, local_P);
+					float world_P[3];
+					Matrix<float>::MultV(world_P, node.xform_, local_P);
 
 					nanort::real3 po;
 					po[0] = world_P[0] - ray.org[0];
@@ -819,16 +817,16 @@ class Scene {
 						isect->v = local_isect.v;
 
 						// TODO(LTE): Implement
-						T Ng[3], Ns[3];	// geometric normal, shading normal.
+						float Ng[3], Ns[3];	// geometric normal, shading normal.
 
 						node.GetMesh()->GetNormal(Ng, Ns, isect->prim_id, isect->u,
 																			isect->v);
 
 						// Convert position and normal into world coordinate.
 						isect->t = t_world;
-						Matrix<T>::MultV(isect->P, node.xform_, local_P);
-						Matrix<T>::MultV(isect->Ng, node.inv_transpose_xform33_, Ng);
-						Matrix<T>::MultV(isect->Ns, node.inv_transpose_xform33_, Ns);
+						Matrix<float>::MultV(isect->P, node.xform_, local_P);
+						Matrix<float>::MultV(isect->Ng, node.inv_transpose_xform33_, Ng);
+						Matrix<float>::MultV(isect->Ns, node.inv_transpose_xform33_, Ns);
 					}
 				}
 			}
@@ -841,8 +839,7 @@ class Scene {
 	///
 	/// Find a node by name.
 	///
-	bool FindNodeRecursive(const std::string &name, Node<M> *root,
-												 Node<M> **found_node) {
+	bool FindNodeRecursive(const std::string &name, Node<M> *root, Node<M> **found_node) {
 		if (root->GetName().compare(name) == 0) {
 			(*found_node) = root;
 			return true;

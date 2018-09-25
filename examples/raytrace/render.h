@@ -16,7 +16,7 @@
 #include "material.h"
 
 struct Asset {
-	std::vector<Mesh > meshes;
+	std::vector<Mesh> meshes;
 	std::vector<Material> materials;
 	
 	//tigra: add default material
@@ -30,7 +30,7 @@ class Renderer { public:
 
 	/// Returns false when the rendering was canceled.
 	static bool Render(float* rgba, float* aux_rgba, int *sample_counts, float quat[4],
-							const nanosg::Scene<float, Mesh> &scene, const Asset &asset, const RenderConfig& config,
+							const nanosg::Scene<Mesh> &scene, const Asset &asset, const RenderConfig& config,
 										 std::atomic<bool>& cancel_flag,
 										 int& _showBufferMode
 										);

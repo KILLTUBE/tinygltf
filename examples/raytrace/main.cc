@@ -117,7 +117,7 @@ bool gShowDepthPeseudoColor = true;
 float gCurrQuat[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 float gPrevQuat[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
-static nanosg::Scene<float, Mesh> gScene;
+static nanosg::Scene<Mesh> gScene;
 static Asset gAsset;
 static std::vector<nanosg::Node<Mesh> > gNodes;
 
@@ -638,7 +638,7 @@ void DrawNode(const nanosg::Node<Mesh> &node) {
 }
 
 // Draw scene with OpenGL
-void DrawScene(const nanosg::Scene<float, Mesh> &scene, const Camera &camera) {
+void DrawScene(const nanosg::Scene<Mesh> &scene, const Camera &camera) {
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_LIGHTING);
