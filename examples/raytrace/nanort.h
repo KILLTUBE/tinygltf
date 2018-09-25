@@ -1126,33 +1126,32 @@ inline T SAH(size_t ns1, T leftArea, size_t ns2, T rightArea, T invS, T Taabb,
 	return sah;
 }
 
-template <typename T>
-inline bool FindCutFromBinBuffer(T *cut_pos,				// [out] xyz
+inline bool FindCutFromBinBuffer(float *cut_pos,				// [out] xyz
 																 int *minCostAxis,	// [out]
 																 const BinBuffer *bins, const real3 &bmin,
 																 const real3 &bmax, size_t num_primitives,
-																 T costTaabb) {			// should be in [0.0, 1.0]
-	const T kEPS = std::numeric_limits<T>::epsilon();	// * epsScale;
+																 float costTaabb) {			// should be in [0.0, 1.0]
+	const float kEPS = std::numeric_limits<float>::epsilon();	// * epsScale;
 
 	size_t left, right;
 	real3 bsize, bstep;
 	real3 bminLeft, bmaxLeft;
 	real3 bminRight, bmaxRight;
-	T saLeft, saRight, saTotal;
-	T pos;
-	T minCost[3];
+	float saLeft, saRight, saTotal;
+	float pos;
+	float minCost[3];
 
-	T costTtri = static_cast<T>(1.0) - costTaabb;
+	float costTtri = 1.0f - costTaabb;
 
 	(*minCostAxis) = 0;
 
 	bsize = bmax - bmin;
-	bstep = bsize * (static_cast<T>(1.0) / bins->bin_size);
+	bstep = bsize * (1.0f / bins->bin_size);
 	saTotal = CalculateSurfaceArea(bmin, bmax);
 
-	T invSaTotal = static_cast<T>(0.0);
+	float invSaTotal = 0.0f;
 	if (saTotal > kEPS) {
-		invSaTotal = static_cast<T>(1.0) / saTotal;
+		invSaTotal = 1.0f / saTotal;
 	}
 
 	for (int j = 0; j < 3; ++j) {
@@ -1166,8 +1165,8 @@ inline bool FindCutFromBinBuffer(T *cut_pos,				// [out] xyz
 		//		 +----+----+----+----+----+
 		//
 
-		T minCostPos = bmin[j] + static_cast<T>(1.0) * bstep[j];
-		minCost[j] = std::numeric_limits<T>::max();
+		float minCostPos = bmin[j] + 1.0f * bstep[j];
+		minCost[j] = std::numeric_limits<float>::max();
 
 		left = 0;
 		right = num_primitives;
@@ -1190,15 +1189,14 @@ inline bool FindCutFromBinBuffer(T *cut_pos,				// [out] xyz
 			// +1 for i since we want a position on right side of the cell.
 			//
 
-			pos = bmin[j] + (i + static_cast<T>(1.0)) * bstep[j];
+			pos = bmin[j] + (i + 1.0f) * bstep[j];
 			bmaxLeft[j] = pos;
 			bminRight[j] = pos;
 
 			saLeft = CalculateSurfaceArea(bminLeft, bmaxLeft);
 			saRight = CalculateSurfaceArea(bminRight, bmaxRight);
 
-			T cost =
-					SAH(left, saLeft, right, saRight, invSaTotal, costTaabb, costTtri);
+			float cost = SAH(left, saLeft, right, saRight, invSaTotal, costTaabb, costTtri);
 			if (cost < minCost[j]) {
 				//
 				// Update the min cost
@@ -1216,7 +1214,7 @@ inline bool FindCutFromBinBuffer(T *cut_pos,				// [out] xyz
 	// cut_pos = minCostPos;
 
 	// Find min cost axis
-	T cost = minCost[0];
+	float cost = minCost[0];
 	(*minCostAxis) = 0;
 	if (cost > minCost[1]) {
 		(*minCostAxis) = 1;
@@ -1232,7 +1230,7 @@ inline bool FindCutFromBinBuffer(T *cut_pos,				// [out] xyz
 
 #ifdef _OPENMP
 template <typename T, class P>
-void ComputeBoundingBoxOMP(real3<T> *bmin, real3<T> *bmax,
+void ComputeBoundingBoxOMP(real3 *bmin, real3 *bmax,
 													 const unsigned int *indices, unsigned int left_index,
 													 unsigned int right_index, const P &p) {
 	{ p.BoundingBox(bmin, bmax, indices[left_index]); }
@@ -1248,7 +1246,7 @@ void ComputeBoundingBoxOMP(real3<T> *bmin, real3<T> *bmax,
 		for (int i = left_index; i < right_index; i++) {	// for each faces
 			unsigned int idx = indices[i];
 
-			real3<T> bbox_min, bbox_max;
+			real3 bbox_min, bbox_max;
 			p.BoundingBox(&bbox_min, &bbox_max, idx);
 			for (int k = 0; k < 3; k++) {	// xyz
 				if ((*bmin)[k] > bbox_min[k]) (*bmin)[k] = bbox_min[k];
@@ -1936,12 +1934,12 @@ bool BVHAccel<T>::MultiHitTestLeafNode(
 		t = isect_pq->top().t;	// current furthest hit distance
 	}
 
-	real3<T> ray_org;
+	real3 ray_org;
 	ray_org[0] = ray.org[0];
 	ray_org[1] = ray.org[1];
 	ray_org[2] = ray.org[2];
 
-	real3<T> ray_dir;
+	real3 ray_dir;
 	ray_dir[0] = ray.dir[0];
 	ray_dir[1] = ray.dir[1];
 	ray_dir[2] = ray.dir[2];
@@ -2232,12 +2230,12 @@ bool BVHAccel<T>::MultiHitTraverse(const Ray<T> &ray,
 	dir_sign[2] = ray.dir[2] < static_cast<T>(0.0) ? static_cast<T>(1) : static_cast<T>(0);
 
 	// @fixme { Check edge case; i.e., 1/0 }
-	real3<T> ray_inv_dir;
+	real3 ray_inv_dir;
 	ray_inv_dir[0] = static_cast<T>(1.0) / ray.dir[0];
 	ray_inv_dir[1] = static_cast<T>(1.0) / ray.dir[1];
 	ray_inv_dir[2] = static_cast<T>(1.0) / ray.dir[2];
 
-	real3<T> ray_org;
+	real3 ray_org;
 	ray_org[0] = ray.org[0];
 	ray_org[1] = ray.org[1];
 	ray_org[2] = ray.org[2];
