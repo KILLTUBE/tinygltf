@@ -764,18 +764,16 @@ class TriangleMesh {
 	const size_t vertex_stride_bytes_;
 };
 
-template <typename T = float>
 class TriangleIntersection {
  public:
-	T u;
-	T v;
-
+	float u;
+	float v;
 	// Required member variables.
-	T t;
+	float t;
 	unsigned int prim_id;
 };
 
-template <typename T = float, class H = TriangleIntersection<T> >
+template <typename T = float, class H = TriangleIntersection>
 class TriangleIntersector {
  public:
 	TriangleIntersector(const T *vertices, const unsigned int *faces,
@@ -1007,11 +1005,7 @@ inline float CalculateSurfaceArea(const real3 &min, const real3 &max) {
 	return 2.0f * (box[0] * box[1] + box[1] * box[2] + box[2] * box[0]);
 }
 
-template <typename T>
-inline void GetBoundingBoxOfTriangle(real3 *bmin, real3 *bmax,
-																		 const T *vertices,
-																		 const unsigned int *faces,
-																		 unsigned int index) {
+inline void GetBoundingBoxOfTriangle(real3 *bmin, real3 *bmax, const float *vertices, const unsigned int *faces, unsigned int index) {
 	unsigned int f0 = faces[3 * index + 0];
 	unsigned int f1 = faces[3 * index + 1];
 	unsigned int f2 = faces[3 * index + 2];
@@ -1742,34 +1736,33 @@ bool BVHAccel::Build(unsigned int num_primitives, const P &p, const Pred &pred, 
 	return true;
 }
 
-template <typename T>
-inline bool IntersectRayAABB(T *tminOut,	// [out]
-														 T *tmaxOut,	// [out]
-														 T min_t, T max_t, const T bmin[3], const T bmax[3],
+inline bool IntersectRayAABB(float *tminOut,	// [out]
+														 float *tmaxOut,	// [out]
+														 float min_t, float max_t, const float bmin[3], const float bmax[3],
 														 real3 ray_org, real3 ray_inv_dir,
 														 int ray_dir_sign[3]) {
-	T tmin, tmax;
+	float tmin, tmax;
 
-	const T min_x = ray_dir_sign[0] ? bmax[0] : bmin[0];
-	const T min_y = ray_dir_sign[1] ? bmax[1] : bmin[1];
-	const T min_z = ray_dir_sign[2] ? bmax[2] : bmin[2];
-	const T max_x = ray_dir_sign[0] ? bmin[0] : bmax[0];
-	const T max_y = ray_dir_sign[1] ? bmin[1] : bmax[1];
-	const T max_z = ray_dir_sign[2] ? bmin[2] : bmax[2];
+	const float min_x = ray_dir_sign[0] ? bmax[0] : bmin[0];
+	const float min_y = ray_dir_sign[1] ? bmax[1] : bmin[1];
+	const float min_z = ray_dir_sign[2] ? bmax[2] : bmin[2];
+	const float max_x = ray_dir_sign[0] ? bmin[0] : bmax[0];
+	const float max_y = ray_dir_sign[1] ? bmin[1] : bmax[1];
+	const float max_z = ray_dir_sign[2] ? bmin[2] : bmax[2];
 
 	// X
-	const T tmin_x = (min_x - ray_org[0]) * ray_inv_dir[0];
+	const float tmin_x = (min_x - ray_org[0]) * ray_inv_dir[0];
 	// MaxMult robust BVH traversal(up to 4 ulp).
 	// 1.0000000000000004 for double precision.
-	const T tmax_x = (max_x - ray_org[0]) * ray_inv_dir[0] * 1.00000024f;
+	const float tmax_x = (max_x - ray_org[0]) * ray_inv_dir[0] * 1.00000024f;
 
 	// Y
-	const T tmin_y = (min_y - ray_org[1]) * ray_inv_dir[1];
-	const T tmax_y = (max_y - ray_org[1]) * ray_inv_dir[1] * 1.00000024f;
+	const float tmin_y = (min_y - ray_org[1]) * ray_inv_dir[1];
+	const float tmax_y = (max_y - ray_org[1]) * ray_inv_dir[1] * 1.00000024f;
 
 	// Z
-	const T tmin_z = (min_z - ray_org[2]) * ray_inv_dir[2];
-	const T tmax_z = (max_z - ray_org[2]) * ray_inv_dir[2] * 1.00000024f;
+	const float tmin_z = (min_z - ray_org[2]) * ray_inv_dir[2];
+	const float tmax_z = (max_z - ray_org[2]) * ray_inv_dir[2] * 1.00000024f;
 
 	tmin = safemax(tmin_z, safemax(tmin_y, safemax(tmin_x, min_t)));
 	tmax = safemin(tmax_z, safemin(tmax_y, safemin(tmax_x, max_t)));
