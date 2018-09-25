@@ -309,35 +309,35 @@ struct Intersection {
 ///
 /// Renderable node
 ///
-template <typename T, class M>
+template <class M>
 class Node {
  public:
-	typedef Node<T, M> type;
+	typedef Node<M> type;
 
 	explicit Node(const M *mesh) : mesh_(mesh) {
-		xbmin_[0] = xbmin_[1] = xbmin_[2] = std::numeric_limits<T>::max();
-		xbmax_[0] = xbmax_[1] = xbmax_[2] = -std::numeric_limits<T>::max();
+		xbmin_[0] = xbmin_[1] = xbmin_[2] = std::numeric_limits<float>::max();
+		xbmax_[0] = xbmax_[1] = xbmax_[2] = -std::numeric_limits<float>::max();
 
-		lbmin_[0] = lbmin_[1] = lbmin_[2] = std::numeric_limits<T>::max();
-		lbmax_[0] = lbmax_[1] = lbmax_[2] = -std::numeric_limits<T>::max();
+		lbmin_[0] = lbmin_[1] = lbmin_[2] = std::numeric_limits<float>::max();
+		lbmax_[0] = lbmax_[1] = lbmax_[2] = -std::numeric_limits<float>::max();
 
-		Matrix<T>::Identity(local_xform_);
-		Matrix<T>::Identity(xform_);
-		Matrix<T>::Identity(inv_xform_);
-		Matrix<T>::Identity(inv_xform33_);
-		inv_xform33_[3][3] = static_cast<T>(0.0);
-		Matrix<T>::Identity(inv_transpose_xform33_);
-		inv_transpose_xform33_[3][3] = static_cast<T>(0.0);
+		Matrix<float>::Identity(local_xform_);
+		Matrix<float>::Identity(xform_);
+		Matrix<float>::Identity(inv_xform_);
+		Matrix<float>::Identity(inv_xform33_);
+		inv_xform33_[3][3] = 0.0f;
+		Matrix<float>::Identity(inv_transpose_xform33_);
+		inv_transpose_xform33_[3][3] = 0.0f;
 	}
 
 	~Node() {}
 
 	void Copy(const type &rhs) {
-		Matrix<T>::Copy(local_xform_, rhs.local_xform_);
-		Matrix<T>::Copy(xform_, rhs.xform_);
-		Matrix<T>::Copy(inv_xform_, rhs.inv_xform_);
-		Matrix<T>::Copy(inv_xform33_, rhs.inv_xform33_);
-		Matrix<T>::Copy(inv_transpose_xform33_, rhs.inv_transpose_xform33_);
+		Matrix<float>::Copy(local_xform_, rhs.local_xform_);
+		Matrix<float>::Copy(xform_, rhs.xform_);
+		Matrix<float>::Copy(inv_xform_, rhs.inv_xform_);
+		Matrix<float>::Copy(inv_xform33_, rhs.inv_xform33_);
+		Matrix<float>::Copy(inv_transpose_xform33_, rhs.inv_transpose_xform33_);
 
 		lbmin_[0] = rhs.lbmin_[0];
 		lbmin_[1] = rhs.lbmin_[1];
@@ -387,7 +387,7 @@ class Node {
 	///
 	/// Update internal state.
 	///
-	void Update(const T parent_xform[4][4]) {
+	void Update(const float parent_xform[4][4]) {
 		if (!accel_.IsValid() && mesh_ && (mesh_->vertices.size() > 3) &&
 				(mesh_->faces.size() >= 3)) {
 			// Assume mesh is composed of triangle faces only.
@@ -407,25 +407,25 @@ class Node {
 		}
 
 		// xform = parent_xform x local_xform
-		Matrix<T>::Mult(xform_, parent_xform, local_xform_);
+		Matrix<float>::Mult(xform_, parent_xform, local_xform_);
 
 		// Compute the bounding box in world coordinate.
 		XformBoundingBox(xbmin_, xbmax_, lbmin_, lbmax_, xform_);
 
 		// Inverse(xform)
-		Matrix<T>::Copy(inv_xform_, xform_);
-		Matrix<T>::Inverse(inv_xform_);
+		Matrix<float>::Copy(inv_xform_, xform_);
+		Matrix<float>::Inverse(inv_xform_);
 
 		// Clear translation, then inverse(xform)
-		Matrix<T>::Copy(inv_xform33_, xform_);
-		inv_xform33_[3][0] = static_cast<T>(0.0);
-		inv_xform33_[3][1] = static_cast<T>(0.0);
-		inv_xform33_[3][2] = static_cast<T>(0.0);
-		Matrix<T>::Inverse(inv_xform33_);
+		Matrix<float>::Copy(inv_xform33_, xform_);
+		inv_xform33_[3][0] = 0.0f;
+		inv_xform33_[3][1] = 0.0f;
+		inv_xform33_[3][2] = 0.0f;
+		Matrix<float>::Inverse(inv_xform33_);
 
 		// Inverse transpose of xform33
-		Matrix<T>::Copy(inv_transpose_xform33_, inv_xform33_);
-		Matrix<T>::Transpose(inv_transpose_xform33_);
+		Matrix<float>::Copy(inv_transpose_xform33_, inv_xform33_);
+		Matrix<float>::Transpose(inv_transpose_xform33_);
 
 		// Update children nodes
 		for (size_t i = 0; i < children_.size(); i++) {
@@ -436,19 +436,19 @@ class Node {
 	///
 	/// Set local transformation.
 	///
-	void SetLocalXform(const T xform[4][4]) {
+	void SetLocalXform(const float xform[4][4]) {
 		memcpy(local_xform_, xform, sizeof(float) * 16);
 	}
 
-	const T *GetLocalXformPtr() const { return &local_xform_[0][0]; }
+	const float *GetLocalXformPtr() const { return &local_xform_[0][0]; }
 
-	const T *GetXformPtr() const { return &xform_[0][0]; }
+	const float *GetXformPtr() const { return &xform_[0][0]; }
 
 	const M *GetMesh() const { return mesh_; }
 
-	const nanort::BVHAccel<T> &GetAccel() const { return accel_; }
+	const nanort::BVHAccel<float> &GetAccel() const { return accel_; }
 
-	inline void GetWorldBoundingBox(T bmin[3], T bmax[3]) const {
+	inline void GetWorldBoundingBox(float bmin[3], float bmax[3]) const {
 		bmin[0] = xbmin_[0];
 		bmin[1] = xbmin_[1];
 		bmin[2] = xbmin_[2];
@@ -458,7 +458,7 @@ class Node {
 		bmax[2] = xbmax_[2];
 	}
 
-	inline void GetLocalBoundingBox(T bmin[3], T bmax[3]) const {
+	inline void GetLocalBoundingBox(float bmin[3], float bmax[3]) const {
 		bmin[0] = lbmin_[0];
 		bmin[1] = lbmin_[1];
 		bmin[2] = lbmin_[2];
@@ -468,25 +468,25 @@ class Node {
 		bmax[2] = lbmax_[2];
 	}
 
-	T local_xform_[4][4];	// Node's local transformation matrix.
-	T xform_[4][4];				// Parent xform x local_xform.
-	T inv_xform_[4][4];		// inverse(xform). world -> local
-	T inv_xform33_[4][4];	// inverse(xform0 with upper-left 3x3 elemets only(for
+	float local_xform_[4][4];	// Node's local transformation matrix.
+	float xform_[4][4];				// Parent xform x local_xform.
+	float inv_xform_[4][4];		// inverse(xform). world -> local
+	float inv_xform33_[4][4];	// inverse(xform0 with upper-left 3x3 elemets only(for
 												 // transforming direction vector)
-	T inv_transpose_xform33_[4][4];	// inverse(transpose(xform)) with upper-left
+	float inv_transpose_xform33_[4][4];	// inverse(transpose(xform)) with upper-left
 																	 // 3x3 elements only(for transforming normal
 																	 // vector)
 
  private:
 	// bounding box(local space)
-	T lbmin_[3];
-	T lbmax_[3];
+	float lbmin_[3];
+	float lbmax_[3];
 
 	// bounding box after xform(world space)
-	T xbmin_[3];
-	T xbmax_[3];
+	float xbmin_[3];
+	float xbmax_[3];
 
-	nanort::BVHAccel<T> accel_;
+	nanort::BVHAccel<float> accel_;
 
 	std::string name_;
 
@@ -501,7 +501,7 @@ class Node {
 template <typename T, class M>
 class NodeBBoxPred {
  public:
-	NodeBBoxPred(const std::vector<Node<T, M> > *nodes)
+	NodeBBoxPred(const std::vector<Node<M> > *nodes)
 			: axis_(0), pos_(0.0f), nodes_(nodes) {}
 
 	void Set(int axis, float pos) const {
@@ -525,13 +525,13 @@ class NodeBBoxPred {
  private:
 	mutable int axis_;
 	mutable float pos_;
-	const std::vector<Node<T, M> > *nodes_;
+	const std::vector<Node<M> > *nodes_;
 };
 
 template <typename T, class M>
 class NodeBBoxGeometry {
  public:
-	NodeBBoxGeometry(const std::vector<Node<T, M> > *nodes) : nodes_(nodes) {}
+	NodeBBoxGeometry(const std::vector<Node<M> > *nodes) : nodes_(nodes) {}
 
 	/// Compute bounding box for `prim_index`th cube.
 	/// This function is called for each primitive in BVH build.
@@ -547,7 +547,7 @@ class NodeBBoxGeometry {
 		(*bmax)[2] = b[2];
 	}
 
-	const std::vector<Node<T, M> > *nodes_;
+	const std::vector<Node<M> > *nodes_;
 	mutable nanort::real3<T> ray_org_;
 	mutable nanort::real3<T> ray_dir_;
 	mutable nanort::BVHTraceOptions trace_options_;
@@ -568,7 +568,7 @@ class NodeBBoxIntersection {
 template <typename T, class M>
 class NodeBBoxIntersector {
  public:
-	NodeBBoxIntersector(const std::vector<Node<T, M> > *nodes) : nodes_(nodes) {}
+	NodeBBoxIntersector(const std::vector<Node<M> > *nodes) : nodes_(nodes) {}
 
 	bool Intersect(float *out_t_min, float *out_t_max,
 								 unsigned int prim_index) const {
@@ -630,7 +630,7 @@ class NodeBBoxIntersector {
 		ray_dir_sign_[2] = ray.dir[2] < static_cast<T>(0.0) ? 1 : 0;
 	}
 
-	const std::vector<Node<T, M> > *nodes_;
+	const std::vector<Node<M> > *nodes_;
 	mutable nanort::real3<T> ray_org_;
 	mutable nanort::real3<T> ray_dir_;
 	mutable nanort::real3<T> ray_inv_dir_;
@@ -650,14 +650,14 @@ class Scene {
 	///
 	/// Add intersectable node to the scene.
 	///
-	bool AddNode(const Node<T, M> &node) {
+	bool AddNode(const Node<M> &node) {
 		nodes_.push_back(node);
 		return true;
 	}
 
-	const std::vector<Node<T, M> > &GetNodes() const { return nodes_; }
+	const std::vector<Node<M> > &GetNodes() const { return nodes_; }
 
-	bool FindNode(const std::string &name, Node<T, M> **found_node) {
+	bool FindNode(const std::string &name, Node<M> **found_node) {
 		if (!found_node) {
 			return false;
 		}
@@ -782,7 +782,7 @@ class Scene {
 				}
 
 				assert(node_hits[i].node_id < nodes_.size());
-				const Node<T, M> &node = nodes_[node_hits[i].node_id];
+				const Node<M> &node = nodes_[node_hits[i].node_id];
 
 				// Transform ray into node's local space
 				// TODO(LTE): Set ray tmin and tmax
@@ -848,8 +848,8 @@ class Scene {
 	///
 	/// Find a node by name.
 	///
-	bool FindNodeRecursive(const std::string &name, Node<T, M> *root,
-												 Node<T, M> **found_node) {
+	bool FindNodeRecursive(const std::string &name, Node<M> *root,
+												 Node<M> **found_node) {
 		if (root->GetName().compare(name) == 0) {
 			(*found_node) = root;
 			return true;
@@ -872,7 +872,7 @@ class Scene {
 
 	// Toplevel BVH accel.
 	nanort::BVHAccel<T> toplevel_accel_;
-	std::vector<Node<T, M> > nodes_;
+	std::vector<Node<M> > nodes_;
 };
 
 }	// namespace nanosg
