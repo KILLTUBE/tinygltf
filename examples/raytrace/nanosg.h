@@ -376,9 +376,9 @@ class Node { public:
 		if (!accel_.IsValid() && mesh_ && (mesh_->vertices.size() > 3) &&
 				(mesh_->faces.size() >= 3)) {
 			// Assume mesh is composed of triangle faces only.
-			nanort::TriangleMesh<float> triangle_mesh(
+			nanort::TriangleMesh triangle_mesh(
 					mesh_->vertices.data(), mesh_->faces.data(), mesh_->stride);
-			nanort::TriangleSAHPred<float> triangle_pred(
+			nanort::TriangleSAHPred triangle_pred(
 					mesh_->vertices.data(), mesh_->faces.data(), mesh_->stride);
 
 			bool ret =

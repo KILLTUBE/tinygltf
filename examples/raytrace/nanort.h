@@ -651,11 +651,11 @@ class BVHAccel {
 };
 
 // Predefined SAH predicator for triangle.
-template <typename T = float>
+
 class TriangleSAHPred {
  public:
 	TriangleSAHPred(
-			const T *vertices, const unsigned int *faces,
+			const float *vertices, const unsigned int *faces,
 			size_t vertex_stride_bytes)	// e.g. 12 for sizeof(float) * XYZ
 			: axis_(0),
 				pos_(0.0f),
@@ -663,42 +663,41 @@ class TriangleSAHPred {
 				faces_(faces),
 				vertex_stride_bytes_(vertex_stride_bytes) {}
 
-	void Set(int axis, T pos) const {
+	void Set(int axis, float pos) const {
 		axis_ = axis;
 		pos_ = pos;
 	}
 
 	bool operator()(unsigned int i) const {
 		int axis = axis_;
-		T pos = pos_;
+		float pos = pos_;
 
 		unsigned int i0 = faces_[3 * i + 0];
 		unsigned int i1 = faces_[3 * i + 1];
 		unsigned int i2 = faces_[3 * i + 2];
 
-		real3 p0(get_vertex_addr<T>(vertices_, i0, vertex_stride_bytes_));
-		real3 p1(get_vertex_addr<T>(vertices_, i1, vertex_stride_bytes_));
-		real3 p2(get_vertex_addr<T>(vertices_, i2, vertex_stride_bytes_));
+		real3 p0(get_vertex_addr<float>(vertices_, i0, vertex_stride_bytes_));
+		real3 p1(get_vertex_addr<float>(vertices_, i1, vertex_stride_bytes_));
+		real3 p2(get_vertex_addr<float>(vertices_, i2, vertex_stride_bytes_));
 
-		T center = p0[axis] + p1[axis] + p2[axis];
+		float center = p0[axis] + p1[axis] + p2[axis];
 
-		return (center < pos * static_cast<T>(3.0));
+		return (center < pos * 3.0f);
 	}
 
  private:
 	mutable int axis_;
-	mutable T pos_;
-	const T *vertices_;
+	mutable float pos_;
+	const float *vertices_;
 	const unsigned int *faces_;
 	const size_t vertex_stride_bytes_;
 };
 
 // Predefined Triangle mesh geometry.
-template <typename T = float>
 class TriangleMesh {
  public:
 	TriangleMesh(
-			const T *vertices, const unsigned int *faces,
+			const float *vertices, const unsigned int *faces,
 			const size_t vertex_stride_bytes)	// e.g. 12 for sizeof(float) * XYZ
 			: vertices_(vertices),
 				faces_(faces),
@@ -723,22 +722,22 @@ class TriangleMesh {
 		for (unsigned int i = 1; i < 3; i++) {
 			for (unsigned int k = 0; k < 3; k++) {
 				if ((*bmin)[static_cast<int>(k)] >
-						get_vertex_addr<T>(vertices_, faces_[3 * prim_index + i],
+						get_vertex_addr<float>(vertices_, faces_[3 * prim_index + i],
 															 vertex_stride_bytes_)[k]) {
-					(*bmin)[static_cast<int>(k)] = get_vertex_addr<T>(
+					(*bmin)[static_cast<int>(k)] = get_vertex_addr<float>(
 							vertices_, faces_[3 * prim_index + i], vertex_stride_bytes_)[k];
 				}
 				if ((*bmax)[static_cast<int>(k)] <
-						get_vertex_addr<T>(vertices_, faces_[3 * prim_index + i],
+						get_vertex_addr<float>(vertices_, faces_[3 * prim_index + i],
 															 vertex_stride_bytes_)[k]) {
-					(*bmax)[static_cast<int>(k)] = get_vertex_addr<T>(
+					(*bmax)[static_cast<int>(k)] = get_vertex_addr<float>(
 							vertices_, faces_[3 * prim_index + i], vertex_stride_bytes_)[k];
 				}
 			}
 		}
 	}
 
-	const T *vertices_;
+	const float *vertices_;
 	const unsigned int *faces_;
 	const size_t vertex_stride_bytes_;
 };
