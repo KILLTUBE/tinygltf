@@ -773,33 +773,30 @@ class TriangleIntersection {
 	unsigned int prim_id;
 };
 
-template <typename T = float, class H = TriangleIntersection>
-class TriangleIntersector {
- public:
-	TriangleIntersector(const T *vertices, const unsigned int *faces,
-											const size_t vertex_stride_bytes)	// e.g.
+// For Watertight Ray/Triangle Intersection.
+typedef struct {
+	float Sx;
+	float Sy;
+	float Sz;
+	int kx;
+	int ky;
+	int kz;
+} RayCoeff;
+
+template <class H = TriangleIntersection>
+class TriangleIntersector { public:
+	TriangleIntersector(const float *vertices, const unsigned int *faces, const size_t vertex_stride_bytes)	// e.g.
 																												 // vertex_stride_bytes
 																												 // = 12 = sizeof(float)
 																												 // * 3
 			: vertices_(vertices),
 				faces_(faces),
 				vertex_stride_bytes_(vertex_stride_bytes) {}
-
-	// For Watertight Ray/Triangle Intersection.
-	typedef struct {
-		T Sx;
-		T Sy;
-		T Sz;
-		int kx;
-		int ky;
-		int kz;
-	} RayCoeff;
-
 	/// Do ray interesection stuff for `prim_index` th primitive and return hit
 	/// distance `t`,
 	/// varycentric coordinate `u` and `v`.
 	/// Returns true if there's intersection.
-	bool Intersect(T *t_inout, const unsigned int prim_index) const {
+	bool Intersect(float *t_inout, const unsigned int prim_index) const {
 		if ((prim_index < trace_options_.prim_ids_range[0]) ||
 				(prim_index >= trace_options_.prim_ids_range[1])) {
 			return false;
@@ -817,16 +814,16 @@ class TriangleIntersector {
 		const real3 B = p1 - ray_org_;
 		const real3 C = p2 - ray_org_;
 
-		const T Ax = A[ray_coeff_.kx] - ray_coeff_.Sx * A[ray_coeff_.kz];
-		const T Ay = A[ray_coeff_.ky] - ray_coeff_.Sy * A[ray_coeff_.kz];
-		const T Bx = B[ray_coeff_.kx] - ray_coeff_.Sx * B[ray_coeff_.kz];
-		const T By = B[ray_coeff_.ky] - ray_coeff_.Sy * B[ray_coeff_.kz];
-		const T Cx = C[ray_coeff_.kx] - ray_coeff_.Sx * C[ray_coeff_.kz];
-		const T Cy = C[ray_coeff_.ky] - ray_coeff_.Sy * C[ray_coeff_.kz];
+		const float Ax = A[ray_coeff_.kx] - ray_coeff_.Sx * A[ray_coeff_.kz];
+		const float Ay = A[ray_coeff_.ky] - ray_coeff_.Sy * A[ray_coeff_.kz];
+		const float Bx = B[ray_coeff_.kx] - ray_coeff_.Sx * B[ray_coeff_.kz];
+		const float By = B[ray_coeff_.ky] - ray_coeff_.Sy * B[ray_coeff_.kz];
+		const float Cx = C[ray_coeff_.kx] - ray_coeff_.Sx * C[ray_coeff_.kz];
+		const float Cy = C[ray_coeff_.ky] - ray_coeff_.Sy * C[ray_coeff_.kz];
 
-		T U = Cx * By - Cy * Bx;
-		T V = Ax * Cy - Ay * Cx;
-		T W = Bx * Ay - By * Ax;
+		float U = Cx * By - Cy * Bx;
+		float V = Ax * Cy - Ay * Cx;
+		float W = Bx * Ay - By * Ax;
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -834,42 +831,43 @@ class TriangleIntersector {
 #endif
 
 		// Fall back to test against edges using double precision.
-		if (U == static_cast<T>(0.0) || V == static_cast<T>(0.0) || W == static_cast<T>(0.0)) {
+		if (U == 0.0f || V == 0.0f || W == 0.0f) {
 			double CxBy = static_cast<double>(Cx) * static_cast<double>(By);
 			double CyBx = static_cast<double>(Cy) * static_cast<double>(Bx);
-			U = static_cast<T>(CxBy - CyBx);
+			U = static_cast<float>(CxBy - CyBx);
 
 			double AxCy = static_cast<double>(Ax) * static_cast<double>(Cy);
 			double AyCx = static_cast<double>(Ay) * static_cast<double>(Cx);
-			V = static_cast<T>(AxCy - AyCx);
+			V = static_cast<float>(AxCy - AyCx);
 
 			double BxAy = static_cast<double>(Bx) * static_cast<double>(Ay);
 			double ByAx = static_cast<double>(By) * static_cast<double>(Ax);
-			W = static_cast<T>(BxAy - ByAx);
+			W = static_cast<float>(BxAy - ByAx);
 		}
 
 		if (trace_options_.cull_back_face) {
-			if (U < static_cast<T>(0.0) || V < static_cast<T>(0.0) || W < static_cast<T>(0.0)) return false;
+			if (U < 0.0f || V < 0.0f || W < 0.0f) return false;
 		} else {
-			if ((U < static_cast<T>(0.0) || V < static_cast<T>(0.0) || W < static_cast<T>(0.0)) && (U > static_cast<T>(0.0) || V > static_cast<T>(0.0) || W > static_cast<T>(0.0))) {
+			if ((U < 0.0f || V < 0.0f || W < 0.0f) && (U > 0.0f || V > 0.0f || W > 0.0f)) {
 				return false;
 			}
 		}
 
-		T det = U + V + W;
-		if (det == static_cast<T>(0.0)) return false;
+		float det = U + V + W;
+		if (det == 0.0f)
+			return false;
 
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
 
-		const T Az = ray_coeff_.Sz * A[ray_coeff_.kz];
-		const T Bz = ray_coeff_.Sz * B[ray_coeff_.kz];
-		const T Cz = ray_coeff_.Sz * C[ray_coeff_.kz];
-		const T D = U * Az + V * Bz + W * Cz;
+		const float Az = ray_coeff_.Sz * A[ray_coeff_.kz];
+		const float Bz = ray_coeff_.Sz * B[ray_coeff_.kz];
+		const float Cz = ray_coeff_.Sz * C[ray_coeff_.kz];
+		const float D = U * Az + V * Bz + W * Cz;
 
-		const T rcpDet = static_cast<T>(1.0) / det;
-		T tt = D * rcpDet;
+		const float rcpDet = 1.0f / det;
+		float tt = D * rcpDet;
 
 		if (tt > (*t_inout)) {
 			return false;
@@ -891,25 +889,24 @@ class TriangleIntersector {
 	}
 
 	/// Returns the nearest hit distance.
-	T GetT() const { return t_; }
+	float GetT() const { return t_; }
 
 	/// Update is called when initializing intesection and nearest hit is found.
-	void Update(T t, unsigned int prim_idx) const {
+	void Update(float t, unsigned int prim_idx) const {
 		t_ = t;
 		prim_id_ = prim_idx;
 	}
 
 	/// Prepare BVH traversal(e.g. compute inverse ray direction)
 	/// This function is called only once in BVH traversal.
-	void PrepareTraversal(const Ray &ray,
-												const BVHTraceOptions &trace_options) const {
+	void PrepareTraversal(const Ray &ray, const BVHTraceOptions &trace_options) const {
 		ray_org_[0] = ray.org[0];
 		ray_org_[1] = ray.org[1];
 		ray_org_[2] = ray.org[2];
 
 		// Calculate dimension where the ray direction is maximal.
 		ray_coeff_.kz = 0;
-		T absDir = std::fabs(ray.dir[0]);
+		float absDir = std::fabs(ray.dir[0]);
 		if (absDir < std::fabs(ray.dir[1])) {
 			ray_coeff_.kz = 1;
 			absDir = std::fabs(ray.dir[1]);
@@ -953,18 +950,18 @@ class TriangleIntersector {
 	}
 
  private:
-	const T *vertices_;
+	const float *vertices_;
 	const unsigned int *faces_;
 	const size_t vertex_stride_bytes_;
 
 	mutable real3 ray_org_;
 	mutable RayCoeff ray_coeff_;
 	mutable BVHTraceOptions trace_options_;
-	mutable T t_min_;
+	mutable float t_min_;
 
-	mutable T t_;
-	mutable T u_;
-	mutable T v_;
+	mutable float t_;
+	mutable float u_;
+	mutable float v_;
 	mutable unsigned int prim_id_;
 	int _pad_;
 };

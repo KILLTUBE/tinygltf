@@ -784,7 +784,7 @@ class Scene {
 				Matrix<T>::MultV(local_ray.org, node.inv_xform_, ray.org);
 				Matrix<T>::MultV(local_ray.dir, node.inv_xform33_, ray.dir);
 
-				nanort::TriangleIntersector<T, H> triangle_intersector(
+				nanort::TriangleIntersector<H> triangle_intersector(
 						node.GetMesh()->vertices.data(), node.GetMesh()->faces.data(),
 						node.GetMesh()->stride);
 				H local_isect;
