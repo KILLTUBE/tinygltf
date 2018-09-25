@@ -44,8 +44,6 @@
 
 #define USE_TEX_CACHE 1
 
-namespace example {
-
 typedef nanort::real3<float> float3;
 
 #ifdef __clang__
@@ -128,7 +126,7 @@ static int LoadTexture(const std::string &filename,
 }
 
 static void ComputeBoundingBoxOfMesh(float bmin[3], float bmax[3],
-																		 const example::Mesh<float> &mesh) {
+																		 const Mesh<float> &mesh) {
 	bmin[0] = bmin[1] = bmin[2] = std::numeric_limits<float>::max();
 	bmax[0] = bmax[1] = bmax[2] = -std::numeric_limits<float>::max();
 
@@ -454,5 +452,3 @@ bool LoadObj(const std::string &filename, float scale,
 
 	return true;
 }
-
-}	// namespace example

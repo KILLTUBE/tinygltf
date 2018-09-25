@@ -1,9 +1,6 @@
-#ifndef RENDER_CONFIG_H
-#define RENDER_CONFIG_H
+#pragma once
 
 #include <string>
-
-namespace example {
 
 typedef struct {
 	// framebuffer
@@ -36,8 +33,4 @@ typedef struct {
 } RenderConfig;
 
 /// Loads config from JSON file.
-bool LoadRenderConfig(example::RenderConfig *config, const char *filename);
-
-}	// namespace
-
-#endif	// RENDER_CONFIG_H
+bool LoadRenderConfig(RenderConfig *config, const char *filename);

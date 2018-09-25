@@ -6,7 +6,6 @@
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #include <tiny_gltf.h>
 
-namespace example {
 static std::string GetFilePathExtension(const std::string &FileName) {
 	if (FileName.find_last_of(".") != std::string::npos)
 		return FileName.substr(FileName.find_last_of(".") + 1);
@@ -491,4 +490,3 @@ bool LoadGLTF(const std::string &filename, float scale,
 	}
 	return ret;
 }
-}	// namespace example

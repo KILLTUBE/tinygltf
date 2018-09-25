@@ -1,5 +1,4 @@
-#ifndef EXAMPLE_GLTF_LOADER_H_
-#define EXAMPLE_GLTF_LOADER_H_
+#pragma once
 
 #include <stdexcept>
 #include <string>
@@ -7,8 +6,6 @@
 
 #include "material.h"
 #include "mesh.h"
-
-namespace example {
 
 /// Adapts an array of bytes to an array of T. Will advace of byte_stride each
 /// elements.
@@ -157,10 +154,4 @@ struct v4dArray {
 ///
 /// Loads glTF 2.0 mesh
 ///
-bool LoadGLTF(const std::string &filename, float scale,
-							std::vector<Mesh<float> > *meshes,
-							std::vector<Material> *materials, std::vector<Texture> *textures);
-
-}	// namespace example
-
-#endif	// EXAMPLE_GLTF_LOADER_H_
+bool LoadGLTF(const std::string &filename, float scale, std::vector<Mesh<float> > *meshes, std::vector<Material> *materials, std::vector<Texture> *textures);

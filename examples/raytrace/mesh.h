@@ -1,13 +1,9 @@
-#ifndef EXAMPLE_MESH_H_
-#define EXAMPLE_MESH_H_
+#pragma once
 
 #include <vector>
 #include <algorithm>
 #include <cmath>
 #include <limits>
-
-namespace example {
-
 
 template<typename T>
 inline void lerp(T dst[3], const T v0[3], const T v1[3], const T v2[3], float u, float v) {
@@ -182,7 +178,3 @@ class Mesh {
 	}
 
 };
-
-}	// namespace example
-
-#endif // EXAMPLE_MESH_H_

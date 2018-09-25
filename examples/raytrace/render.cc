@@ -55,7 +55,6 @@ THE SOFTWARE.
 #undef max
 #endif
 
-namespace example {
 
 // PCG32 code / (c) 2014 M.E. O'Neill / pcg-random.org
 // Licensed under Apache License 2.0 (NO WARRANTY, etc. see website)
@@ -236,8 +235,8 @@ void FetchTexture(const Texture &texture, float u, float v, float* col) {
 
 bool Renderer::Render(float* rgba, float* aux_rgba, int* sample_counts,
 											float quat[4], 
-											const nanosg::Scene<float, example::Mesh<float>> &scene,
-											const example::Asset &asset,
+											const nanosg::Scene<float, Mesh<float>> &scene,
+											const Asset &asset,
 											const RenderConfig& config,
 											std::atomic<bool>& cancelFlag,
 											int &_showBufferMode
@@ -556,5 +555,3 @@ bool Renderer::Render(float* rgba, float* aux_rgba, int* sample_counts,
 
 	return (!cancelFlag);
 };
-
-}	// namespace example

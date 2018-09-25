@@ -1,5 +1,4 @@
-#ifndef EXAMPLE_MATERIAL_H_
-#define EXAMPLE_MATERIAL_H_
+#pragma once
 
 #include <cstdlib>
 
@@ -9,8 +8,6 @@
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
 #endif
-
-namespace example {
 
 struct Material {
 	// float ambient[3];
@@ -68,8 +65,3 @@ struct Texture {
 		image = NULL;
 	}
 };
-
-}	// namespace example
-
-
-#endif	// EXAMPLE_MATERIAL_H_

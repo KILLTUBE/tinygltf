@@ -1,6 +1,4 @@
-#ifndef EXAMPLE_RENDER_H_
-#define EXAMPLE_RENDER_H_
-
+#pragma once
 #include <atomic>	// C++11
 
 //mode definitions now here 
@@ -16,8 +14,6 @@
 #include "nanosg.h"
 #include "mesh.h"
 #include "material.h"
-
-namespace example {
 
 struct Asset {
 	std::vector<Mesh<float> > meshes;
@@ -39,6 +35,3 @@ class Renderer { public:
 										 int& _showBufferMode
 										);
 };
-};
-
-#endif	// EXAMPLE_RENDER_H_

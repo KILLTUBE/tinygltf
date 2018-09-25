@@ -1,13 +1,9 @@
 #include "render-config.h"
-
 #include "picojson.h"
-
 #include <fstream>
 #include <istream>
 
-namespace example {
-
-bool LoadRenderConfig(example::RenderConfig* config, const char* filename) {
+bool LoadRenderConfig(RenderConfig *config, const char *filename) {
 	std::ifstream is(filename);
 	if (is.fail()) {
 		std::cerr << "Cannot open " << filename << std::endl;
@@ -119,4 +115,3 @@ bool LoadRenderConfig(example::RenderConfig* config, const char* filename) {
 
 	return true;
 }
-}	// namespace example

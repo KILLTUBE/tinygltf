@@ -117,15 +117,15 @@ bool gShowDepthPeseudoColor = true;
 float gCurrQuat[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 float gPrevQuat[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
-static nanosg::Scene<float, example::Mesh<float> > gScene;
-static example::Asset gAsset;
-static std::vector<nanosg::Node<float, example::Mesh<float> > > gNodes;
+static nanosg::Scene<float, Mesh<float> > gScene;
+static Asset gAsset;
+static std::vector<nanosg::Node<float, Mesh<float> > > gNodes;
 
 std::atomic<bool> gRenderQuit;
 std::atomic<bool> gRenderRefresh;
 std::atomic<bool> gRenderCancel;
 std::atomic<bool> gSceneDirty;
-example::RenderConfig gRenderConfig;
+RenderConfig gRenderConfig;
 std::mutex gMutex;
 
 struct RenderLayer {
@@ -198,7 +198,7 @@ void RenderThread() {
 		// gRenderCancel may be set to true in main loop.
 		// Render() will repeatedly check this flag inside the rendering loop.
 
-		bool ret = example::Renderer::Render(
+		bool ret = Renderer::Render(
 				&gRenderLayer.rgba.at(0), &gRenderLayer.auxRGBA.at(0),
 				&gRenderLayer.sampleCounts.at(0), gCurrQuat, gScene, gAsset,
 				gRenderConfig, gRenderCancel,
@@ -219,7 +219,7 @@ void RenderThread() {
 	}
 }
 
-void InitRender(example::RenderConfig *rc) {
+void InitRender(RenderConfig *rc) {
 	rc->pass = 0;
 
 	rc->max_passes = 128;
@@ -576,7 +576,7 @@ void EditTransform(const ManipConfig &config, const Camera &camera,
 											 NULL, useSnap ? &snap.x : NULL);
 }
 
-void DrawMesh(const example::Mesh<float> *mesh) {
+void DrawMesh(const Mesh<float> *mesh) {
 	// TODO(LTE): Use vertex array or use display list.
 
 	glBegin(GL_TRIANGLES);
@@ -622,7 +622,7 @@ void DrawMesh(const example::Mesh<float> *mesh) {
 	glEnd();
 }
 
-void DrawNode(const nanosg::Node<float, example::Mesh<float> > &node) {
+void DrawNode(const nanosg::Node<float, Mesh<float> > &node) {
 	glPushMatrix();
 	glMultMatrixf(node.GetLocalXformPtr());
 
@@ -638,7 +638,7 @@ void DrawNode(const nanosg::Node<float, example::Mesh<float> > &node) {
 }
 
 // Draw scene with OpenGL
-void DrawScene(const nanosg::Scene<float, example::Mesh<float> > &scene,
+void DrawScene(const nanosg::Scene<float, Mesh<float> > &scene,
 							 const Camera &camera) {
 	glEnable(GL_DEPTH_TEST);
 
@@ -657,7 +657,7 @@ void DrawScene(const nanosg::Scene<float, example::Mesh<float> > &scene,
 	glLightfv(GL_LIGHT1, GL_POSITION, &light1_pos[0]);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, &light_diffuse[0]);
 
-	const std::vector<nanosg::Node<float, example::Mesh<float> > > &root_nodes =
+	const std::vector<nanosg::Node<float, Mesh<float> > > &root_nodes =
 			scene.GetNodes();
 
 	glMatrixMode(GL_PROJECTION);
@@ -684,7 +684,7 @@ void DrawScene(const nanosg::Scene<float, example::Mesh<float> > &scene,
 
 void BuildSceneItems(std::vector<std::string> *display_names,
 										 std::vector<std::string> *names,
-										 const nanosg::Node<float, example::Mesh<float> > &node,
+										 const nanosg::Node<float, Mesh<float> > &node,
 										 int indent) {
 	if (node.GetName().empty()) {
 		// Skip a node with empty name.
@@ -708,7 +708,7 @@ void BuildSceneItems(std::vector<std::string> *display_names,
 }
 
 // tigra: add default material
-example::Material default_material;
+Material default_material;
 
 int main(int argc, char **argv) {
 	std::string config_filename = "config.json";
@@ -720,7 +720,7 @@ int main(int argc, char **argv) {
 	// load config
 	{
 		bool ret =
-				example::LoadRenderConfig(&gRenderConfig, config_filename.c_str());
+				LoadRenderConfig(&gRenderConfig, config_filename.c_str());
 		if (!ret) {
 			std::cerr << "Failed to load [ " << config_filename << " ]" << std::endl;
 			return -1;
@@ -729,9 +729,9 @@ int main(int argc, char **argv) {
 
 	// construct the scene
 	{
-		std::vector<example::Mesh<float> > meshes;
-		std::vector<example::Material> materials;
-		std::vector<example::Texture> textures;
+		std::vector<Mesh<float> > meshes;
+		std::vector<Material> materials;
+		std::vector<Texture> textures;
 
 		// tigra: set default material to 95% white diffuse
 		default_material.diffuse[0] = 0.95f;
@@ -782,7 +782,7 @@ int main(int argc, char **argv) {
 		}
 
 		for (size_t n = 0; n < gAsset.meshes.size(); n++) {
-			nanosg::Node<float, example::Mesh<float> > node(&gAsset.meshes[n]);
+			nanosg::Node<float, Mesh<float> > node(&gAsset.meshes[n]);
 
 			// case where the name of a mesh isn't defined in the loaded file
 			if (gAsset.meshes[n].name.empty()) {
@@ -816,7 +816,7 @@ int main(int argc, char **argv) {
 	std::vector<const char *> imgui_node_names;
 	std::vector<std::string> display_node_names;
 	std::vector<std::string> node_names;
-	std::map<int, nanosg::Node<float, example::Mesh<float> > *> node_map;
+	std::map<int, nanosg::Node<float, Mesh<float> > *> node_map;
 
 	{
 		for (size_t i = 0; i < gScene.GetNodes().size(); i++) {
@@ -833,7 +833,7 @@ int main(int argc, char **argv) {
 
 		// Construct list index <-> Node ptr map.
 		for (size_t i = 0; i < node_names.size(); i++) {
-			nanosg::Node<float, example::Mesh<float> > *node;
+			nanosg::Node<float, Mesh<float> > *node;
 
 			if (gScene.FindNode(node_names[i], &node)) {
 				// std::cout << "id : " << i << ", name : " << node_names[i] <<
