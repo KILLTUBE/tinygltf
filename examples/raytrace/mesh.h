@@ -55,8 +55,7 @@ inline void calculate_normal(float Nn[3], const float v0[3], const float v1[3], 
 	vnormalize(Nn, N);
 }
 
-class Mesh {
- public:
+class Mesh { public:
 	explicit Mesh(const size_t vertex_stride) :
 		stride(vertex_stride) {
 	}

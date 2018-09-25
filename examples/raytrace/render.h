@@ -30,7 +30,7 @@ class Renderer { public:
 
 	/// Returns false when the rendering was canceled.
 	static bool Render(float* rgba, float* aux_rgba, int *sample_counts, float quat[4],
-							const nanosg::Scene<Mesh> &scene, const Asset &asset, const RenderConfig& config,
+							const nanosg::Scene &scene, const Asset &asset, const RenderConfig& config,
 										 std::atomic<bool>& cancel_flag,
 										 int& _showBufferMode
 										);

@@ -36,6 +36,7 @@ THE SOFTWARE.
 #include <vector>
 
 #include "nanort.h"
+#include "mesh.h"
 
 namespace nanosg {
 
@@ -299,12 +300,10 @@ struct Intersection {
 };
 
 // Renderable node
-template <class M>
-class Node {
- public:
-	typedef Node<M> type;
 
-	explicit Node(const M *mesh) : mesh_(mesh) {
+class Node { public:
+
+	explicit Node(const Mesh *mesh) : mesh_(mesh) {
 		xbmin_[0] = xbmin_[1] = xbmin_[2] = std::numeric_limits<float>::max();
 		xbmax_[0] = xbmax_[1] = xbmax_[2] = -std::numeric_limits<float>::max();
 
@@ -322,7 +321,7 @@ class Node {
 
 	~Node() {}
 
-	void Copy(const type &rhs) {
+	void Copy(const Node &rhs) {
 		Matrix::Copy(local_xform_, rhs.local_xform_);
 		Matrix::Copy(xform_, rhs.xform_);
 		Matrix::Copy(inv_xform_, rhs.inv_xform_);
@@ -351,9 +350,9 @@ class Node {
 		children_ = rhs.children_;
 	}
 
-	Node(const type &rhs) { Copy(rhs); }
+	Node(const Node &rhs) { Copy(rhs); }
 
-	const type &operator=(const type &rhs) {
+	const Node &operator=(const Node &rhs) {
 		Copy(rhs);
 		return (*this);
 	}
@@ -365,14 +364,10 @@ class Node {
 	///
 	/// Add child node.
 	///
-	void AddChild(const type &child) { children_.push_back(child); }
+	void AddChild(const Node &child) { children_.push_back(child); }
 
-	///
-	/// Get chidren
-	///
-	const std::vector<type> &GetChildren() const { return children_; }
-
-	std::vector<type> &GetChildren() { return children_; }
+	const std::vector<Node> &GetChildren() const { return children_; }
+	std::vector<Node> &GetChildren() { return children_; }
 
 	///
 	/// Update internal state.
@@ -434,7 +429,7 @@ class Node {
 
 	const float *GetXformPtr() const { return &xform_[0][0]; }
 
-	const M *GetMesh() const { return mesh_; }
+	const Mesh *GetMesh() const { return mesh_; }
 
 	const nanort::BVHAccel &GetAccel() const { return accel_; }
 
@@ -480,9 +475,9 @@ class Node {
 
 	std::string name_;
 
-	const M *mesh_;
+	const Mesh *mesh_;
 
-	std::vector<type> children_;
+	std::vector<Node> children_;
 };
 
 // -------------------------------------------------
@@ -490,7 +485,7 @@ class Node {
 // Predefined SAH predicator for cube.
 template <class M>
 class NodeBBoxPred { public:
-	NodeBBoxPred(const std::vector<Node<M> > *nodes)
+	NodeBBoxPred(const std::vector<Node> *nodes)
 			: axis_(0), pos_(0.0f), nodes_(nodes) {}
 
 	void Set(int axis, float pos) const {
@@ -514,13 +509,13 @@ class NodeBBoxPred { public:
  private:
 	mutable int axis_;
 	mutable float pos_;
-	const std::vector<Node<M> > *nodes_;
+	const std::vector<Node> *nodes_;
 };
 
 template <class M>
 class NodeBBoxGeometry {
  public:
-	NodeBBoxGeometry(const std::vector<Node<M> > *nodes) : nodes_(nodes) {}
+	NodeBBoxGeometry(const std::vector<Node> *nodes) : nodes_(nodes) {}
 
 	/// Compute bounding box for `prim_index`th cube.
 	/// This function is called for each primitive in BVH build.
@@ -535,28 +530,24 @@ class NodeBBoxGeometry {
 		(*bmax)[2] = b[2];
 	}
 
-	const std::vector<Node<M> > *nodes_;
+	const std::vector<Node> *nodes_;
 	mutable nanort::real3 ray_org_;
 	mutable nanort::real3 ray_dir_;
 	mutable nanort::BVHTraceOptions trace_options_;
 	int _pad_;
 };
 
-class NodeBBoxIntersection {
- public:
+class NodeBBoxIntersection { public:
 	NodeBBoxIntersection() {}
-
 	float normal[3];
-
 	// Required member variables.
 	float t;
 	unsigned int prim_id;
 };
 
 template <class M>
-class NodeBBoxIntersector {
- public:
-	NodeBBoxIntersector(const std::vector<Node<M> > *nodes) : nodes_(nodes) {}
+class NodeBBoxIntersector { public:
+	NodeBBoxIntersector(const std::vector<Node> *nodes) : nodes_(nodes) {}
 
 	bool Intersect(float *out_t_min, float *out_t_max, unsigned int prim_index) const {
 		float bmin[3], bmax[3];
@@ -617,16 +608,14 @@ class NodeBBoxIntersector {
 		ray_dir_sign_[2] = ray.dir[2] < 0.0f ? 1 : 0;
 	}
 
-	const std::vector<Node<M> > *nodes_;
+	const std::vector<Node> *nodes_;
 	mutable nanort::real3 ray_org_;
 	mutable nanort::real3 ray_dir_;
 	mutable nanort::real3 ray_inv_dir_;
 	mutable int ray_dir_sign_[3];
 };
 
-template <class M>
-class Scene {
- public:
+class Scene { public:
 	Scene() {
 		bmin_[0] = bmin_[1] = bmin_[2] = std::numeric_limits<float>::max();
 		bmax_[0] = bmax_[1] = bmax_[2] = -std::numeric_limits<float>::max();
@@ -637,14 +626,14 @@ class Scene {
 	///
 	/// Add intersectable node to the scene.
 	///
-	bool AddNode(const Node<M> &node) {
+	bool AddNode(const Node &node) {
 		nodes_.push_back(node);
 		return true;
 	}
 
-	const std::vector<Node<M> > &GetNodes() const { return nodes_; }
+	const std::vector<Node> &GetNodes() const { return nodes_; }
 
-	bool FindNode(const std::string &name, Node<M> **found_node) {
+	bool FindNode(const std::string &name, Node **found_node) {
 		if (!found_node) {
 			return false;
 		}
@@ -682,8 +671,8 @@ class Scene {
 		}
 
 		// Build toplevel BVH.
-		NodeBBoxGeometry<M> geom(&nodes_);
-		NodeBBoxPred<M> pred(&nodes_);
+		NodeBBoxGeometry<Mesh> geom(&nodes_);
+		NodeBBoxPred<Mesh> pred(&nodes_);
 
 		// FIXME(LTE): Limit one leaf contains one node bbox primitive. This would
 		// work, but would be inefficient.
@@ -745,7 +734,7 @@ class Scene {
 
 		bool has_hit = false;
 
-		NodeBBoxIntersector<M> isector(&nodes_);
+		NodeBBoxIntersector<Mesh> isector(&nodes_);
 		nanort::StackVector<nanort::NodeHit, 128> node_hits;
 		bool may_hit = toplevel_accel_.ListNodeIntersections(ray, kMaxIntersections, isector, &node_hits);
 
@@ -766,7 +755,7 @@ class Scene {
 				}
 
 				assert(node_hits[i].node_id < nodes_.size());
-				const Node<M> &node = nodes_[node_hits[i].node_id];
+				const Node &node = nodes_[node_hits[i].node_id];
 
 				// Transform ray into node's local space
 				// TODO(LTE): Set ray tmin and tmax
@@ -832,7 +821,7 @@ class Scene {
 	///
 	/// Find a node by name.
 	///
-	bool FindNodeRecursive(const std::string &name, Node<M> *root, Node<M> **found_node) {
+	bool FindNodeRecursive(const std::string &name, Node *root, Node **found_node) {
 		if (root->GetName().compare(name) == 0) {
 			(*found_node) = root;
 			return true;
@@ -855,7 +844,7 @@ class Scene {
 
 	// Toplevel BVH accel.
 	nanort::BVHAccel toplevel_accel_;
-	std::vector<Node<M> > nodes_;
+	std::vector<Node> nodes_;
 };
 
 }	// namespace nanosg
