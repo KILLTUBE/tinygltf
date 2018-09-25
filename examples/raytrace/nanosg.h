@@ -483,7 +483,6 @@ class Node { public:
 // -------------------------------------------------
 
 // Predefined SAH predicator for cube.
-template <class M>
 class NodeBBoxPred { public:
 	NodeBBoxPred(const std::vector<Node> *nodes)
 			: axis_(0), pos_(0.0f), nodes_(nodes) {}
@@ -512,9 +511,7 @@ class NodeBBoxPred { public:
 	const std::vector<Node> *nodes_;
 };
 
-template <class M>
-class NodeBBoxGeometry {
- public:
+class NodeBBoxGeometry { public:
 	NodeBBoxGeometry(const std::vector<Node> *nodes) : nodes_(nodes) {}
 
 	/// Compute bounding box for `prim_index`th cube.
@@ -545,7 +542,6 @@ class NodeBBoxIntersection { public:
 	unsigned int prim_id;
 };
 
-template <class M>
 class NodeBBoxIntersector { public:
 	NodeBBoxIntersector(const std::vector<Node> *nodes) : nodes_(nodes) {}
 
@@ -671,8 +667,8 @@ class Scene { public:
 		}
 
 		// Build toplevel BVH.
-		NodeBBoxGeometry<Mesh> geom(&nodes_);
-		NodeBBoxPred<Mesh> pred(&nodes_);
+		NodeBBoxGeometry geom(&nodes_);
+		NodeBBoxPred pred(&nodes_);
 
 		// FIXME(LTE): Limit one leaf contains one node bbox primitive. This would
 		// work, but would be inefficient.
@@ -734,7 +730,7 @@ class Scene { public:
 
 		bool has_hit = false;
 
-		NodeBBoxIntersector<Mesh> isector(&nodes_);
+		NodeBBoxIntersector isector(&nodes_);
 		nanort::StackVector<nanort::NodeHit, 128> node_hits;
 		bool may_hit = toplevel_accel_.ListNodeIntersections(ray, kMaxIntersections, isector, &node_hits);
 
