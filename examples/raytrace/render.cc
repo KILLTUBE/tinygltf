@@ -87,7 +87,7 @@ void pcg32_srandom(pcg32_state_t* rng, uint64_t initstate, uint64_t initseq) {
 
 const float kPI = 3.141592f;
 
-typedef nanort::real3<float> float3;
+typedef nanort::real3 float3;
 
 inline float3 Lerp3(float3 v0, float3 v1, float3 v2, float u, float v) {
 	return (1.0f - u - v) * v0 + u * v1 + v * v2;

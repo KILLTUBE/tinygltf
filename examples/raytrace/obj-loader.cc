@@ -44,7 +44,7 @@
 
 #define USE_TEX_CACHE 1
 
-typedef nanort::real3<float> float3;
+typedef nanort::real3 float3;
 
 #ifdef __clang__
 #pragma clang diagnostic push

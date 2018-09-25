@@ -265,31 +265,30 @@ class StackVector
 
 // ----------------------------------------------------------------------------
 
-template <typename T = float>
 class real3 {
  public:
 	real3() {}
-	real3(T x) {
+	real3(float x) {
 		v[0] = x;
 		v[1] = x;
 		v[2] = x;
 	}
-	real3(T xx, T yy, T zz) {
+	real3(float xx, float yy, float zz) {
 		v[0] = xx;
 		v[1] = yy;
 		v[2] = zz;
 	}
-	explicit real3(const T *p) {
+	explicit real3(const float *p) {
 		v[0] = p[0];
 		v[1] = p[1];
 		v[2] = p[2];
 	}
 
-	inline T x() const { return v[0]; }
-	inline T y() const { return v[1]; }
-	inline T z() const { return v[2]; }
+	inline float x() const { return v[0]; }
+	inline float y() const { return v[1]; }
+	inline float z() const { return v[2]; }
 
-	real3 operator*(T f) const { return real3(x() * f, y() * f, z() * f); }
+	real3 operator*(float f) const { return real3(x() * f, y() * f, z() * f); }
 	real3 operator-(const real3 &f2) const {
 		return real3(x() - f2.x(), y() - f2.y(), z() - f2.z());
 	}
@@ -309,34 +308,30 @@ class real3 {
 		return real3(x() / f2.x(), y() / f2.y(), z() / f2.z());
 	}
 	real3 operator-() const { return real3(-x(), -y(), -z()); }
-	T operator[](int i) const { return v[i]; }
-	T &operator[](int i) { return v[i]; }
+	float operator[](int i) const { return v[i]; }
+	float &operator[](int i) { return v[i]; }
 
-	T v[3];
+	float v[3];
 	// T pad;	// for alignment(when T = float)
 };
 
-template <typename T>
-inline real3<T> operator*(T f, const real3<T> &v) {
-	return real3<T>(v.x() * f, v.y() * f, v.z() * f);
+inline real3 operator*(float f, const real3 &v) {
+	return real3(v.x() * f, v.y() * f, v.z() * f);
 }
 
-template <typename T>
-inline real3<T> vneg(const real3<T> &rhs) {
-	return real3<T>(-rhs.x(), -rhs.y(), -rhs.z());
+inline real3 vneg(const real3 &rhs) {
+	return real3(-rhs.x(), -rhs.y(), -rhs.z());
 }
 
-template <typename T>
-inline T vlength(const real3<T> &rhs) {
+inline float vlength(const real3 &rhs) {
 	return std::sqrt(rhs.x() * rhs.x() + rhs.y() * rhs.y() + rhs.z() * rhs.z());
 }
 
-template <typename T>
-inline real3<T> vnormalize(const real3<T> &rhs) {
-	real3<T> v = rhs;
-	T len = vlength(rhs);
-	if (std::fabs(len) > static_cast<T>(1.0e-6)) {
-		T inv_len = static_cast<T>(1.0) / len;
+inline real3 vnormalize(const real3 &rhs) {
+	real3 v = rhs;
+	float len = vlength(rhs);
+	if (std::fabs(len) > static_cast<float>(1.0e-6)) {
+		float inv_len = 1.0f / len;
 		v.v[0] *= inv_len;
 		v.v[1] *= inv_len;
 		v.v[2] *= inv_len;
@@ -344,17 +339,15 @@ inline real3<T> vnormalize(const real3<T> &rhs) {
 	return v;
 }
 
-template <typename T>
-inline real3<T> vcross(real3<T> a, real3<T> b) {
-	real3<T> c;
+inline real3 vcross(real3 a, real3 b) {
+	real3 c;
 	c[0] = a[1] * b[2] - a[2] * b[1];
 	c[1] = a[2] * b[0] - a[0] * b[2];
 	c[2] = a[0] * b[1] - a[1] * b[0];
 	return c;
 }
 
-template <typename T>
-inline T vdot(real3<T> a, real3<T> b) {
+inline float vdot(real3 a, real3 b) {
 	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
@@ -506,8 +499,8 @@ class BVHTraceOptions {
 template <typename T>
 class BBox {
  public:
-	real3<T> bmin;
-	real3<T> bmax;
+	real3 bmin;
+	real3 bmax;
 
 	BBox() {
 		bmin[0] = bmin[1] = bmin[2] = std::numeric_limits<T>::max();
@@ -712,9 +705,9 @@ class TriangleSAHPred {
 		unsigned int i1 = faces_[3 * i + 1];
 		unsigned int i2 = faces_[3 * i + 2];
 
-		real3<T> p0(get_vertex_addr<T>(vertices_, i0, vertex_stride_bytes_));
-		real3<T> p1(get_vertex_addr<T>(vertices_, i1, vertex_stride_bytes_));
-		real3<T> p2(get_vertex_addr<T>(vertices_, i2, vertex_stride_bytes_));
+		real3 p0(get_vertex_addr<T>(vertices_, i0, vertex_stride_bytes_));
+		real3 p1(get_vertex_addr<T>(vertices_, i1, vertex_stride_bytes_));
+		real3 p2(get_vertex_addr<T>(vertices_, i2, vertex_stride_bytes_));
 
 		T center = p0[axis] + p1[axis] + p2[axis];
 
@@ -742,8 +735,7 @@ class TriangleMesh {
 
 	/// Compute bounding box for `prim_index`th triangle.
 	/// This function is called for each primitive in BVH build.
-	void BoundingBox(real3<T> *bmin, real3<T> *bmax,
-									 unsigned int prim_index) const {
+	void BoundingBox(real3 *bmin, real3 *bmax, unsigned int prim_index) const {
 		(*bmin)[0] = get_vertex_addr(vertices_, faces_[3 * prim_index + 0],
 																 vertex_stride_bytes_)[0];
 		(*bmin)[1] = get_vertex_addr(vertices_, faces_[3 * prim_index + 0],
@@ -827,13 +819,13 @@ class TriangleIntersector {
 		const unsigned int f1 = faces_[3 * prim_index + 1];
 		const unsigned int f2 = faces_[3 * prim_index + 2];
 
-		const real3<T> p0(get_vertex_addr(vertices_, f0 + 0, vertex_stride_bytes_));
-		const real3<T> p1(get_vertex_addr(vertices_, f1 + 0, vertex_stride_bytes_));
-		const real3<T> p2(get_vertex_addr(vertices_, f2 + 0, vertex_stride_bytes_));
+		const real3 p0(get_vertex_addr(vertices_, f0 + 0, vertex_stride_bytes_));
+		const real3 p1(get_vertex_addr(vertices_, f1 + 0, vertex_stride_bytes_));
+		const real3 p2(get_vertex_addr(vertices_, f2 + 0, vertex_stride_bytes_));
 
-		const real3<T> A = p0 - ray_org_;
-		const real3<T> B = p1 - ray_org_;
-		const real3<T> C = p2 - ray_org_;
+		const real3 A = p0 - ray_org_;
+		const real3 B = p1 - ray_org_;
+		const real3 C = p2 - ray_org_;
 
 		const T Ax = A[ray_coeff_.kx] - ray_coeff_.Sx * A[ray_coeff_.kz];
 		const T Ay = A[ray_coeff_.ky] - ray_coeff_.Sy * A[ray_coeff_.kz];
@@ -975,7 +967,7 @@ class TriangleIntersector {
 	const unsigned int *faces_;
 	const size_t vertex_stride_bytes_;
 
-	mutable real3<T> ray_org_;
+	mutable real3 ray_org_;
 	mutable RayCoeff ray_coeff_;
 	mutable BVHTraceOptions trace_options_;
 	mutable T t_min_;
@@ -1018,15 +1010,13 @@ struct BinBuffer {
 	unsigned int pad0;
 };
 
-template <typename T>
-inline T CalculateSurfaceArea(const real3<T> &min, const real3<T> &max) {
-	real3<T> box = max - min;
-	return static_cast<T>(2.0) *
-				 (box[0] * box[1] + box[1] * box[2] + box[2] * box[0]);
+inline float CalculateSurfaceArea(const real3 &min, const real3 &max) {
+	real3 box = max - min;
+	return 2.0f * (box[0] * box[1] + box[1] * box[2] + box[2] * box[0]);
 }
 
 template <typename T>
-inline void GetBoundingBoxOfTriangle(real3<T> *bmin, real3<T> *bmax,
+inline void GetBoundingBoxOfTriangle(real3 *bmin, real3 *bmax,
 																		 const T *vertices,
 																		 const unsigned int *faces,
 																		 unsigned int index) {
@@ -1034,11 +1024,11 @@ inline void GetBoundingBoxOfTriangle(real3<T> *bmin, real3<T> *bmax,
 	unsigned int f1 = faces[3 * index + 1];
 	unsigned int f2 = faces[3 * index + 2];
 
-	real3<T> p[3];
+	real3 p[3];
 
-	p[0] = real3<T>(&vertices[3 * f0]);
-	p[1] = real3<T>(&vertices[3 * f1]);
-	p[2] = real3<T>(&vertices[3 * f2]);
+	p[0] = real3(&vertices[3 * f0]);
+	p[1] = real3(&vertices[3 * f1]);
+	p[2] = real3(&vertices[3 * f2]);
 
 	(*bmin) = p[0];
 	(*bmax) = p[0];
@@ -1056,14 +1046,14 @@ inline void GetBoundingBoxOfTriangle(real3<T> *bmin, real3<T> *bmax,
 
 template <typename T, class P>
 inline void ContributeBinBuffer(BinBuffer *bins,	// [out]
-																const real3<T> &scene_min,
-																const real3<T> &scene_max,
+																const real3 &scene_min,
+																const real3 &scene_max,
 																unsigned int *indices, unsigned int left_idx,
 																unsigned int right_idx, const P &p) {
 	T bin_size = static_cast<T>(bins->bin_size);
 
 	// Calculate extent
-	real3<T> scene_size, scene_inv_size;
+	real3 scene_size, scene_inv_size;
 	scene_size = scene_max - scene_min;
 	for (int i = 0; i < 3; ++i) {
 		assert(scene_size[i] >= static_cast<T>(0.0));
@@ -1088,14 +1078,14 @@ inline void ContributeBinBuffer(BinBuffer *bins,	// [out]
 		//
 		// q[i] = (int)(p[i] - scene_bmin) / scene_size
 		//
-		real3<T> bmin;
-		real3<T> bmax;
+		real3 bmin;
+		real3 bmax;
 
 		p.BoundingBox(&bmin, &bmax, indices[i]);
 		// GetBoundingBoxOfTriangle(&bmin, &bmax, vertices, faces, indices[i]);
 
-		real3<T> quantized_bmin = (bmin - scene_min) * scene_inv_size;
-		real3<T> quantized_bmax = (bmax - scene_min) * scene_inv_size;
+		real3 quantized_bmin = (bmin - scene_min) * scene_inv_size;
+		real3 quantized_bmax = (bmax - scene_min) * scene_inv_size;
 
 		// idx is now in [0, BIN_SIZE)
 		for (int j = 0; j < 3; ++j) {
@@ -1139,15 +1129,15 @@ inline T SAH(size_t ns1, T leftArea, size_t ns2, T rightArea, T invS, T Taabb,
 template <typename T>
 inline bool FindCutFromBinBuffer(T *cut_pos,				// [out] xyz
 																 int *minCostAxis,	// [out]
-																 const BinBuffer *bins, const real3<T> &bmin,
-																 const real3<T> &bmax, size_t num_primitives,
+																 const BinBuffer *bins, const real3 &bmin,
+																 const real3 &bmax, size_t num_primitives,
 																 T costTaabb) {			// should be in [0.0, 1.0]
 	const T kEPS = std::numeric_limits<T>::epsilon();	// * epsScale;
 
 	size_t left, right;
-	real3<T> bsize, bstep;
-	real3<T> bminLeft, bmaxLeft;
-	real3<T> bminRight, bmaxRight;
+	real3 bsize, bstep;
+	real3 bminLeft, bmaxLeft;
+	real3 bminRight, bmaxRight;
 	T saLeft, saRight, saTotal;
 	T pos;
 	T minCost[3];
@@ -1286,8 +1276,8 @@ void ComputeBoundingBoxOMP(real3<T> *bmin, real3<T> *bmax,
 }
 #endif
 
-template <typename T, class P>
-inline void ComputeBoundingBox(real3<T> *bmin, real3<T> *bmax,
+template <class P>
+inline void ComputeBoundingBox(real3 *bmin, real3 *bmax,
 															 const unsigned int *indices,
 															 unsigned int left_index,
 															 unsigned int right_index, const P &p) {
@@ -1300,7 +1290,7 @@ inline void ComputeBoundingBox(real3<T> *bmin, real3<T> *bmax,
 		for (unsigned int i = left_index + 1; i < right_index;
 				 i++) {	// for each primitives
 			unsigned int idx = indices[i];
-			real3<T> bbox_min, bbox_max;
+			real3 bbox_min, bbox_max;
 			p.BoundingBox(&bbox_min, &bbox_max, idx);
 			for (int k = 0; k < 3; k++) {	// xyz
 				if ((*bmin)[k] > bbox_min[k]) (*bmin)[k] = bbox_min[k];
@@ -1311,7 +1301,7 @@ inline void ComputeBoundingBox(real3<T> *bmin, real3<T> *bmax,
 }
 
 template <typename T>
-inline void GetBoundingBox(real3<T> *bmin, real3<T> *bmax,
+inline void GetBoundingBox(real3 *bmin, real3 *bmax,
 													 const std::vector<BBox<T> > &bboxes,
 													 unsigned int *indices, unsigned int left_index,
 													 unsigned int right_index) {
@@ -1369,7 +1359,7 @@ unsigned int BVHAccel<T>::BuildShallowTree(std::vector<BVHNode<T> > *out_nodes,
 		stats_.max_tree_depth = depth;
 	}
 
-	real3<T> bmin, bmax;
+	real3 bmin, bmax;
 	ComputeBoundingBox(&bmin, &bmax, &indices_.at(0), left_idx, right_idx, p);
 
 	unsigned int n = right_idx - left_idx;
@@ -1515,7 +1505,7 @@ unsigned int BVHAccel<T>::BuildTree(BVHBuildStatistics *out_stat,
 		out_stat->max_tree_depth = depth;
 	}
 
-	real3<T> bmin, bmax;
+	real3 bmin, bmax;
 	if (!bboxes_.empty()) {
 		GetBoundingBox(&bmin, &bmax, bboxes_, &indices_.at(0), left_idx, right_idx);
 	} else {
@@ -1560,7 +1550,7 @@ unsigned int BVHAccel<T>::BuildTree(BVHBuildStatistics *out_stat,
 	T cut_pos[3] = {0.0, 0.0, 0.0};
 
 	BinBuffer bins(options_.bin_size);
-	ContributeBinBuffer(&bins, bmin, bmax, &indices_.at(0), left_idx, right_idx,
+	ContributeBinBuffer<float, P>(&bins, bmin, bmax, &indices_.at(0), left_idx, right_idx,
 											p);
 	FindCutFromBinBuffer(cut_pos, &min_cut_axis, &bins, bmin, bmax, n,
 											 options_.cost_t_aabb);
@@ -1665,7 +1655,7 @@ bool BVHAccel<T>::Build(unsigned int num_primitives, const P &p,
 	//
 	// 2. Compute bounding box(optional).
 	//
-	real3<T> bmin, bmax;
+	real3 bmin, bmax;
 	if (options.cache_bbox) {
 		bmin[0] = bmin[1] = bmin[2] = std::numeric_limits<T>::max();
 		bmax[0] = bmax[1] = bmax[2] = -std::numeric_limits<T>::max();
@@ -1692,7 +1682,7 @@ bool BVHAccel<T>::Build(unsigned int num_primitives, const P &p,
 #ifdef _OPENMP
 		ComputeBoundingBoxOMP(&bmin, &bmax, &indices_.at(0), 0, n, p);
 #else
-		ComputeBoundingBox(&bmin, &bmax, &indices_.at(0), 0, n, p);
+		ComputeBoundingBox<P>(&bmin, &bmax, &indices_.at(0), 0, n, p);
 #endif
 	}
 
@@ -1853,7 +1843,7 @@ template <typename T>
 inline bool IntersectRayAABB(T *tminOut,	// [out]
 														 T *tmaxOut,	// [out]
 														 T min_t, T max_t, const T bmin[3], const T bmax[3],
-														 real3<T> ray_org, real3<T> ray_inv_dir,
+														 real3 ray_org, real3 ray_inv_dir,
 														 int ray_dir_sign[3]) {
 	T tmin, tmax;
 
@@ -1902,12 +1892,12 @@ inline bool BVHAccel<T>::TestLeafNode(const BVHNode<T> &node, const Ray<T> &ray,
 
 	T t = intersector.GetT();	// current hit distance
 
-	real3<T> ray_org;
+	real3 ray_org;
 	ray_org[0] = ray.org[0];
 	ray_org[1] = ray.org[1];
 	ray_org[2] = ray.org[2];
 
-	real3<T> ray_dir;
+	real3 ray_dir;
 	ray_dir[0] = ray.dir[0];
 	ray_dir[1] = ray.dir[1];
 	ray_dir[2] = ray.dir[2];
@@ -2025,12 +2015,12 @@ bool BVHAccel<T>::Traverse(const Ray<T> &ray, const I &intersector, H *isect,
 	dir_sign[2] = ray.dir[2] < 0.0f ? 1 : 0;
 
 	// @fixme { Check edge case; i.e., 1/0 }
-	real3<T> ray_inv_dir;
+	real3 ray_inv_dir;
 	ray_inv_dir[0] = 1.0f / (ray.dir[0] + 1.0e-12f);
 	ray_inv_dir[1] = 1.0f / (ray.dir[1] + 1.0e-12f);
 	ray_inv_dir[2] = 1.0f / (ray.dir[2] + 1.0e-12f);
 
-	real3<T> ray_org;
+	real3 ray_org;
 	ray_org[0] = ray.org[0];
 	ray_org[1] = ray.org[1];
 	ray_org[2] = ray.org[2];
@@ -2085,12 +2075,12 @@ inline bool BVHAccel<T>::TestLeafNodeIntersections(
 	unsigned int num_primitives = node.data[0];
 	unsigned int offset = node.data[1];
 
-	real3<T> ray_org;
+	real3 ray_org;
 	ray_org[0] = ray.org[0];
 	ray_org[1] = ray.org[1];
 	ray_org[2] = ray.org[2];
 
-	real3<T> ray_dir;
+	real3 ray_dir;
 	ray_dir[0] = ray.dir[0];
 	ray_dir[1] = ray.dir[1];
 	ray_dir[2] = ray.dir[2];
@@ -2154,12 +2144,12 @@ bool BVHAccel<T>::ListNodeIntersections(
 			ray.dir[2] < static_cast<T>(0.0) ? 1 : 0;
 
 	// @fixme { Check edge case; i.e., 1/0 }
-	real3<T> ray_inv_dir;
+	real3 ray_inv_dir;
 	ray_inv_dir[0] = static_cast<T>(1.0) / ray.dir[0];
 	ray_inv_dir[1] = static_cast<T>(1.0) / ray.dir[1];
 	ray_inv_dir[2] = static_cast<T>(1.0) / ray.dir[2];
 
-	real3<T> ray_org;
+	real3 ray_org;
 	ray_org[0] = ray.org[0];
 	ray_org[1] = ray.org[1];
 	ray_org[2] = ray.org[2];

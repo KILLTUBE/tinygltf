@@ -222,7 +222,7 @@ class Matrix {
 		dst[2] = tmp[2];
 	}
 
-	static void MultV(nanort::real3<T> &dst, const T m[4][4], const T v[3]) {
+	static void MultV(nanort::real3 &dst, const T m[4][4], const T v[3]) {
 		T tmp[3];
 		tmp[0] = m[0][0] * v[0] + m[1][0] * v[1] + m[2][0] * v[2] + m[3][0];
 		tmp[1] = m[0][1] * v[0] + m[1][1] * v[1] + m[2][1] * v[2] + m[3][1];
@@ -299,9 +299,9 @@ struct Intersection {
 	float u;
 	float v;
 	unsigned int node_id;    // node ID of the hit.
-	nanort::real3<float> P;  // intersection point
-	nanort::real3<float> Ns; // shading normal
-	nanort::real3<float> Ng; // geometric normal
+	nanort::real3 P;  // intersection point
+	nanort::real3 Ns; // shading normal
+	nanort::real3 Ng; // geometric normal
 };
 
 // Renderable node
@@ -531,8 +531,7 @@ class NodeBBoxGeometry {
 
 	/// Compute bounding box for `prim_index`th cube.
 	/// This function is called for each primitive in BVH build.
-	void BoundingBox(nanort::real3<T> *bmin, nanort::real3<T> *bmax,
-									 unsigned int prim_index) const {
+	void BoundingBox(nanort::real3 *bmin, nanort::real3 *bmax, unsigned int prim_index) const {
 		T a[3], b[3];
 		(*nodes_)[prim_index].GetWorldBoundingBox(a, b);
 		(*bmin)[0] = a[0];
@@ -544,8 +543,8 @@ class NodeBBoxGeometry {
 	}
 
 	const std::vector<Node<M> > *nodes_;
-	mutable nanort::real3<T> ray_org_;
-	mutable nanort::real3<T> ray_dir_;
+	mutable nanort::real3 ray_org_;
+	mutable nanort::real3 ray_dir_;
 	mutable nanort::BVHTraceOptions trace_options_;
 	int _pad_;
 };
@@ -627,9 +626,9 @@ class NodeBBoxIntersector {
 	}
 
 	const std::vector<Node<M> > *nodes_;
-	mutable nanort::real3<T> ray_org_;
-	mutable nanort::real3<T> ray_dir_;
-	mutable nanort::real3<T> ray_inv_dir_;
+	mutable nanort::real3 ray_org_;
+	mutable nanort::real3 ray_dir_;
+	mutable nanort::real3 ray_inv_dir_;
 	mutable int ray_dir_sign_[3];
 };
 
@@ -804,7 +803,7 @@ class Scene {
 					T world_P[3];
 					Matrix<T>::MultV(world_P, node.xform_, local_P);
 
-					nanort::real3<T> po;
+					nanort::real3 po;
 					po[0] = world_P[0] - ray.org[0];
 					po[1] = world_P[1] - ray.org[1];
 					po[2] = world_P[2] - ray.org[2];
