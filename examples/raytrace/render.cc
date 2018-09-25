@@ -333,7 +333,7 @@ bool Renderer::Render(float* rgba, float* aux_rgba, int* sample_counts,
 					ray.max_t = kFar;
 
 					
-					nanosg::Intersection<float> isect;
+					nanosg::Intersection isect;
 					bool hit = scene.Traverse(ray, &isect, /* cull_back_face */false);
 
 					if (hit) {

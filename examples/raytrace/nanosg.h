@@ -292,23 +292,19 @@ static void XformBoundingBox(T xbmin[3],	// out
 	}
 }
 
-template <typename T>
 struct Intersection {
 	// required fields.
-	T t;									 // hit distance
+	float t;									 // hit distance
 	unsigned int prim_id;	// primitive ID of the hit
 	float u;
 	float v;
-
-	unsigned int node_id;	// node ID of the hit.
-	nanort::real3<T> P;		// intersection point
-	nanort::real3<T> Ns;	 // shading normal
-	nanort::real3<T> Ng;	 // geometric normal
+	unsigned int node_id;    // node ID of the hit.
+	nanort::real3<float> P;  // intersection point
+	nanort::real3<float> Ns; // shading normal
+	nanort::real3<float> Ng; // geometric normal
 };
 
-///
-/// Renderable node
-///
+// Renderable node
 template <class M>
 class Node {
  public:
