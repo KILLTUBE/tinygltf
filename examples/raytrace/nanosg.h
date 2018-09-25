@@ -698,11 +698,10 @@ class Scene {
 		// value of BVHBuildOptions.
 		// Implement more better and efficient BVH build and traverse for Toplevel
 		// BVH.
-		nanort::BVHBuildOptions<T> build_options;
+		nanort::BVHBuildOptions build_options;
 		build_options.min_leaf_primitives = 1;
 
-		bool ret = toplevel_accel_.Build(static_cast<unsigned int>(nodes_.size()),
-																		 geom, pred, build_options);
+		bool ret = toplevel_accel_.Build(static_cast<unsigned int>(nodes_.size()), geom, pred, build_options);
 
 		nanort::BVHBuildStatistics stats = toplevel_accel_.GetStatistics();
 		(void)stats;

@@ -436,10 +436,8 @@ class IntersectComparator {
 	bool operator()(const H &a, const H &b) const { return a.t < b.t; }
 };
 
-/// BVH build option.
-template <typename T = float>
 struct BVHBuildOptions {
-	T cost_t_aabb;
+	float cost_t_aabb;
 	unsigned int min_leaf_primitives;
 	unsigned int max_tree_depth;
 	unsigned int bin_size;
@@ -547,24 +545,16 @@ class BVHAccel {
 	/// Build BVH for input primitives.
 	///
 	template <class P, class Pred>
-	bool Build(const unsigned int num_primitives, const P &p, const Pred &pred,
-						 const BVHBuildOptions<float> &options = BVHBuildOptions<float>());
+	bool Build(const unsigned int num_primitives, const P &p, const Pred &pred, const BVHBuildOptions &options = BVHBuildOptions());
 
-	///
-	/// Get statistics of built BVH tree. Valid after Build()
-	///
+	// Get statistics of built BVH tree. Valid after Build()
 	BVHBuildStatistics GetStatistics() const { return stats_; }
 
-	///
-	/// Dump built BVH to the file.
-	///
+	// Dump built BVH to the file.
 	bool Dump(const char *filename);
 
-	///
-	/// Load BVH binary
-	///
+	// Load BVH binary
 	bool Load(const char *filename);
-
 	void Debug();
 
 	///
@@ -572,8 +562,7 @@ class BVHAccel {
 	/// found
 	///
 	template <class I, class H>
-	bool Traverse(const Ray &ray, const I &intersector, H *isect,
-								const BVHTraceOptions &options = BVHTraceOptions()) const;
+	bool Traverse(const Ray &ray, const I &intersector, H *isect, const BVHTraceOptions &options = BVHTraceOptions()) const;
 
 #if 0
 	/// Multi-hit ray traversal
@@ -666,7 +655,7 @@ class BVHAccel {
 	std::vector<BVHNode> nodes_;
 	std::vector<unsigned int> indices_;	// max 4G triangles.
 	std::vector<BBox> bboxes_;
-	BVHBuildOptions<float> options_;
+	BVHBuildOptions options_;
 	BVHBuildStatistics stats_;
 	unsigned int pad0_;
 };
@@ -1596,7 +1585,7 @@ unsigned int BVHAccel::BuildTree(BVHBuildStatistics *out_stat,
 }
 
 template <class P, class Pred>
-bool BVHAccel::Build(unsigned int num_primitives, const P &p, const Pred &pred, const BVHBuildOptions<float> &options) {
+bool BVHAccel::Build(unsigned int num_primitives, const P &p, const Pred &pred, const BVHBuildOptions &options) {
 	options_ = options;
 	stats_ = BVHBuildStatistics();
 
