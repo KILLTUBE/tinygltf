@@ -553,14 +553,13 @@ class NodeBBoxIntersection {
 	unsigned int prim_id;
 };
 
-template <typename T, class M>
+template <class M>
 class NodeBBoxIntersector {
  public:
 	NodeBBoxIntersector(const std::vector<Node<M> > *nodes) : nodes_(nodes) {}
 
-	bool Intersect(float *out_t_min, float *out_t_max,
-								 unsigned int prim_index) const {
-		T bmin[3], bmax[3];
+	bool Intersect(float *out_t_min, float *out_t_max, unsigned int prim_index) const {
+		float bmin[3], bmax[3];
 
 		(*nodes_)[prim_index].GetWorldBoundingBox(bmin, bmax);
 
@@ -609,13 +608,13 @@ class NodeBBoxIntersector {
 		ray_dir_[2] = ray.dir[2];
 
 		// FIXME(syoyo): Consider zero div case.
-		ray_inv_dir_[0] = static_cast<T>(1.0) / ray.dir[0];
-		ray_inv_dir_[1] = static_cast<T>(1.0) / ray.dir[1];
-		ray_inv_dir_[2] = static_cast<T>(1.0) / ray.dir[2];
+		ray_inv_dir_[0] = 1.0f / ray.dir[0];
+		ray_inv_dir_[1] = 1.0f / ray.dir[1];
+		ray_inv_dir_[2] = 1.0f / ray.dir[2];
 
-		ray_dir_sign_[0] = ray.dir[0] < static_cast<T>(0.0) ? 1 : 0;
-		ray_dir_sign_[1] = ray.dir[1] < static_cast<T>(0.0) ? 1 : 0;
-		ray_dir_sign_[2] = ray.dir[2] < static_cast<T>(0.0) ? 1 : 0;
+		ray_dir_sign_[0] = ray.dir[0] < 0.0f ? 1 : 0;
+		ray_dir_sign_[1] = ray.dir[1] < 0.0f ? 1 : 0;
+		ray_dir_sign_[2] = ray.dir[2] < 0.0f ? 1 : 0;
 	}
 
 	const std::vector<Node<M> > *nodes_;
@@ -746,7 +745,7 @@ class Scene {
 
 		bool has_hit = false;
 
-		NodeBBoxIntersector<float, M> isector(&nodes_);
+		NodeBBoxIntersector<M> isector(&nodes_);
 		nanort::StackVector<nanort::NodeHit, 128> node_hits;
 		bool may_hit = toplevel_accel_.ListNodeIntersections(ray, kMaxIntersections, isector, &node_hits);
 

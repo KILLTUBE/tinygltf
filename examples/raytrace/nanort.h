@@ -359,7 +359,7 @@ inline const real *get_vertex_addr(const real *p, const size_t idx,
 }
 
 class Ray { public:
-	Ray() : min_t(static_cast<float>(0.0)), max_t(std::numeric_limits<float>::max()) {
+	Ray() : min_t(0.0f), max_t(std::numeric_limits<float>::max()) {
 		org[0] =  0.0f;
 		org[1] =  0.0f;
 		org[2] =  0.0f;
@@ -1018,12 +1018,12 @@ inline void ContributeBinBuffer(BinBuffer *bins,	// [out]
 	real3 scene_size, scene_inv_size;
 	scene_size = scene_max - scene_min;
 	for (int i = 0; i < 3; ++i) {
-		assert(scene_size[i] >= static_cast<float>(0.0));
+		assert(scene_size[i] >= 0.0f);
 
-		if (scene_size[i] > static_cast<float>(0.0)) {
+		if (scene_size[i] > 0.0f) {
 			scene_inv_size[i] = bin_size / scene_size[i];
 		} else {
-			scene_inv_size[i] = static_cast<float>(0.0);
+			scene_inv_size[i] = 0.0f;
 		}
 	}
 
