@@ -358,15 +358,14 @@ inline const real *get_vertex_addr(const real *p, const size_t idx,
 			reinterpret_cast<const unsigned char *>(p) + idx * stride_bytes);
 }
 
-class Ray {
- public:
+class Ray { public:
 	Ray() : min_t(static_cast<float>(0.0)), max_t(std::numeric_limits<float>::max()) {
-		org[0] = static_cast<float>(0.0);
-		org[1] = static_cast<float>(0.0);
-		org[2] = static_cast<float>(0.0);
-		dir[0] = static_cast<float>(0.0);
-		dir[1] = static_cast<float>(0.0);
-		dir[2] = static_cast<float>(-1.0);
+		org[0] =  0.0f;
+		org[1] =  0.0f;
+		org[2] =  0.0f;
+		dir[0] =  0.0f;
+		dir[1] =  0.0f;
+		dir[2] = -1.0f;
 	}
 
 	float org[3];				 // must set
@@ -377,8 +376,7 @@ class Ray {
 	int dir_sign[3];	// filled internally
 };
 
-class BVHNode {
- public:
+class BVHNode { public:
 	BVHNode() {}
 	BVHNode(const BVHNode &rhs) {
 		bmin[0] = rhs.bmin[0];
@@ -431,8 +429,7 @@ class BVHNode {
 };
 
 template <class H>
-class IntersectComparator {
- public:
+class IntersectComparator { public:
 	bool operator()(const H &a, const H &b) const { return a.t < b.t; }
 };
 
@@ -460,9 +457,7 @@ struct BVHBuildOptions {
 				cache_bbox(false) {}
 };
 
-/// BVH build statistics.
-class BVHBuildStatistics {
- public:
+class BVHBuildStatistics { public:
 	unsigned int max_tree_depth;
 	unsigned int num_leaf_nodes;
 	unsigned int num_branch_nodes;
@@ -476,9 +471,7 @@ class BVHBuildStatistics {
 				build_secs(0.0f) {}
 };
 
-/// BVH trace option.
-class BVHTraceOptions {
- public:
+class BVHTraceOptions { public:
 	// Hit only for face IDs in indexRange.
 	// This feature is good to mimic something like glDrawArrays()
 	unsigned int prim_ids_range[2];
@@ -528,9 +521,7 @@ class NodeHit { public:
 	unsigned int node_id;
 };
 
-template <typename T>
-class NodeHitComparator {
- public:
+class NodeHitComparator { public:
 	inline bool operator()(const NodeHit &a, const NodeHit &b) {
 		return a.t_min < b.t_min;
 	}
@@ -641,8 +632,7 @@ class BVHAccel {
 	bool TestLeafNodeIntersections(
 			const BVHNode &node, const Ray &ray, const int max_intersections,
 			const I &intersector,
-			std::priority_queue<NodeHit, std::vector<NodeHit>,
-													NodeHitComparator<float> > *isect_pq) const;
+			std::priority_queue<NodeHit, std::vector<NodeHit>, NodeHitComparator> *isect_pq) const;
 
 #if 0
 	template<class I, class H, class Comp>
@@ -1016,24 +1006,24 @@ inline void GetBoundingBoxOfTriangle(real3 *bmin, real3 *bmax, const float *vert
 	}
 }
 
-template <typename T, class P>
+template <class P>
 inline void ContributeBinBuffer(BinBuffer *bins,	// [out]
 																const real3 &scene_min,
 																const real3 &scene_max,
 																unsigned int *indices, unsigned int left_idx,
 																unsigned int right_idx, const P &p) {
-	T bin_size = static_cast<T>(bins->bin_size);
+	float bin_size = static_cast<float>(bins->bin_size);
 
 	// Calculate extent
 	real3 scene_size, scene_inv_size;
 	scene_size = scene_max - scene_min;
 	for (int i = 0; i < 3; ++i) {
-		assert(scene_size[i] >= static_cast<T>(0.0));
+		assert(scene_size[i] >= static_cast<float>(0.0));
 
-		if (scene_size[i] > static_cast<T>(0.0)) {
+		if (scene_size[i] > static_cast<float>(0.0)) {
 			scene_inv_size[i] = bin_size / scene_size[i];
 		} else {
-			scene_inv_size[i] = static_cast<T>(0.0);
+			scene_inv_size[i] = static_cast<float>(0.0);
 		}
 	}
 
@@ -1513,8 +1503,7 @@ unsigned int BVHAccel::BuildTree(BVHBuildStatistics *out_stat,
 	float cut_pos[3] = {0.0, 0.0, 0.0};
 
 	BinBuffer bins(options_.bin_size);
-	ContributeBinBuffer<float, P>(&bins, bmin, bmax, &indices_.at(0), left_idx, right_idx,
-											p);
+	ContributeBinBuffer<P>(&bins, bmin, bmax, &indices_.at(0), left_idx, right_idx, p);
 	FindCutFromBinBuffer(cut_pos, &min_cut_axis, &bins, bmin, bmax, n, options_.cost_t_aabb);
 
 	// Try all 3 axis until good cut position avaiable.
@@ -1946,8 +1935,7 @@ template <class I>
 inline bool BVHAccel::TestLeafNodeIntersections(
 		const BVHNode &node, const Ray &ray, const int max_intersections,
 		const I &intersector,
-		std::priority_queue<NodeHit, std::vector<NodeHit>,
-												NodeHitComparator<float> > *isect_pq) const {
+		std::priority_queue<NodeHit, std::vector<NodeHit>, NodeHitComparator> *isect_pq) const {
 	bool hit = false;
 
 	unsigned int num_primitives = node.data[0];
@@ -2006,7 +1994,7 @@ bool BVHAccel::ListNodeIntersections(
 	node_stack[0] = 0;
 
 	// Stores furthest intersection at top
-	std::priority_queue<NodeHit, std::vector<NodeHit>, NodeHitComparator<float>> isect_pq;
+	std::priority_queue<NodeHit, std::vector<NodeHit>, NodeHitComparator> isect_pq;
 
 	(*hits)->clear();
 
