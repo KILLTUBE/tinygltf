@@ -495,20 +495,16 @@ class BVHTraceOptions {
 	}
 };
 
-template <typename T>
-class BBox {
- public:
+class BBox { public:
 	real3 bmin;
 	real3 bmax;
-
 	BBox() {
-		bmin[0] = bmin[1] = bmin[2] = std::numeric_limits<T>::max();
-		bmax[0] = bmax[1] = bmax[2] = -std::numeric_limits<T>::max();
+		bmin[0] = bmin[1] = bmin[2] = std::numeric_limits<float>::max();
+		bmax[0] = bmax[1] = bmax[2] = -std::numeric_limits<float>::max();
 	}
 };
 
-class NodeHit {
- public:
+class NodeHit { public:
 	NodeHit()
 			: t_min(std::numeric_limits<float>::max()),
 				t_max(-std::numeric_limits<float>::max()),
@@ -671,7 +667,7 @@ class BVHAccel {
 
 	std::vector<BVHNode> nodes_;
 	std::vector<unsigned int> indices_;	// max 4G triangles.
-	std::vector<BBox<T> > bboxes_;
+	std::vector<BBox> bboxes_;
 	BVHBuildOptions<T> options_;
 	BVHBuildStatistics stats_;
 	unsigned int pad0_;
@@ -1296,9 +1292,8 @@ inline void ComputeBoundingBox(real3 *bmin, real3 *bmax,
 	}
 }
 
-template <typename T>
 inline void GetBoundingBox(real3 *bmin, real3 *bmax,
-													 const std::vector<BBox<T> > &bboxes,
+													 const std::vector<BBox> &bboxes,
 													 unsigned int *indices, unsigned int left_index,
 													 unsigned int right_index) {
 	{
@@ -1312,16 +1307,16 @@ inline void GetBoundingBox(real3 *bmin, real3 *bmax,
 		(*bmax)[2] = bboxes[idx].bmax[2];
 	}
 
-	T local_bmin[3] = {(*bmin)[0], (*bmin)[1], (*bmin)[2]};
-	T local_bmax[3] = {(*bmax)[0], (*bmax)[1], (*bmax)[2]};
+	float local_bmin[3] = {(*bmin)[0], (*bmin)[1], (*bmin)[2]};
+	float local_bmax[3] = {(*bmax)[0], (*bmax)[1], (*bmax)[2]};
 
 	{
 		for (unsigned int i = left_index; i < right_index; i++) {	// for each faces
 			unsigned int idx = indices[i];
 
 			for (int k = 0; k < 3; k++) {	// xyz
-				T minval = bboxes[idx].bmin[k];
-				T maxval = bboxes[idx].bmax[k];
+				float minval = bboxes[idx].bmin[k];
+				float maxval = bboxes[idx].bmax[k];
 				if (local_bmin[k] > minval) local_bmin[k] = minval;
 				if (local_bmax[k] < maxval) local_bmax[k] = maxval;
 			}
@@ -1660,7 +1655,7 @@ bool BVHAccel<T>::Build(unsigned int num_primitives, const P &p,
 		for (size_t i = 0; i < n; i++) {	// for each primitived
 			unsigned int idx = indices_[i];
 
-			BBox<T> bbox;
+			BBox bbox;
 			p.BoundingBox(&(bbox.bmin), &(bbox.bmax), static_cast<unsigned int>(i));
 			bboxes_[idx] = bbox;
 
