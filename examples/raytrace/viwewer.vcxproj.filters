@@ -78,5 +78,6 @@
     <ClCompile Include="render.cc" />
     <ClCompile Include="stbi-impl.cc" />
     <ClCompile Include="nanort.cc" />
+    <ClCompile Include="bvhaccel.cpp" />
   </ItemGroup>
 </Project>

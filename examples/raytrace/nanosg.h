@@ -236,12 +236,11 @@ class Matrix {
 // typedef Matrix<float> Matrixf;
 // typedef Matrix<double> Matrixd;
 
-template <typename T>
-static void XformBoundingBox(T xbmin[3],	// out
-														 T xbmax[3],	// out
-														 T bmin[3], T bmax[3], T m[4][4]) {
+static void XformBoundingBox(float xbmin[3],	// out
+														 float xbmax[3],	// out
+														 float bmin[3], float bmax[3], float m[4][4]) {
 	// create bounding vertex from (bmin, bmax)
-	T b[8][3];
+	float b[8][3];
 
 	b[0][0] = bmin[0];
 	b[0][1] = bmin[1];
@@ -269,9 +268,9 @@ static void XformBoundingBox(T xbmin[3],	// out
 	b[7][1] = bmax[1];
 	b[7][2] = bmax[2];
 
-	T xb[8][3];
+	float xb[8][3];
 	for (int i = 0; i < 8; i++) {
-		Matrix<T>::MultV(xb[i], m, b[i]);
+		Matrix<float>::MultV(xb[i], m, b[i]);
 	}
 
 	xbmin[0] = xb[0][0];
@@ -442,7 +441,7 @@ class Node {
 
 	const M *GetMesh() const { return mesh_; }
 
-	const nanort::BVHAccel<float> &GetAccel() const { return accel_; }
+	const nanort::BVHAccel &GetAccel() const { return accel_; }
 
 	inline void GetWorldBoundingBox(float bmin[3], float bmax[3]) const {
 		bmin[0] = xbmin_[0];
@@ -482,7 +481,7 @@ class Node {
 	float xbmin_[3];
 	float xbmax_[3];
 
-	nanort::BVHAccel<float> accel_;
+	nanort::BVHAccel accel_;
 
 	std::string name_;
 
@@ -606,7 +605,7 @@ class NodeBBoxIntersector {
 
 	/// Prepare BVH traversal(e.g. compute inverse ray direction)
 	/// This function is called only once in BVH traversal.
-	void PrepareTraversal(const nanort::Ray<float> &ray) const {
+	void PrepareTraversal(const nanort::Ray &ray) const {
 		ray_org_[0] = ray.org[0];
 		ray_org_[1] = ray.org[1];
 		ray_org_[2] = ray.org[2];
@@ -745,7 +744,7 @@ class Scene {
 	/// Then, trace into the hit node to find the intersection of the primitive.
 	///
 	template <class H>
-	bool Traverse(nanort::Ray<T> &ray, H *isect,
+	bool Traverse(nanort::Ray &ray, H *isect,
 								const bool cull_back_face = false) const {
 		if (!toplevel_accel_.IsValid()) {
 			return false;
@@ -781,7 +780,7 @@ class Scene {
 
 				// Transform ray into node's local space
 				// TODO(LTE): Set ray tmin and tmax
-				nanort::Ray<T> local_ray;
+				nanort::Ray local_ray;
 				Matrix<T>::MultV(local_ray.org, node.inv_xform_, ray.org);
 				Matrix<T>::MultV(local_ray.dir, node.inv_xform33_, ray.dir);
 
@@ -862,11 +861,11 @@ class Scene {
 
 	// Scene bounding box.
 	// Valid after calling `Commit()`.
-	T bmin_[3];
-	T bmax_[3];
+	float bmin_[3];
+	float bmax_[3];
 
 	// Toplevel BVH accel.
-	nanort::BVHAccel<T> toplevel_accel_;
+	nanort::BVHAccel toplevel_accel_;
 	std::vector<Node<M> > nodes_;
 };
 

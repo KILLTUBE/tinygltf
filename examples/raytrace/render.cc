@@ -200,7 +200,7 @@ void BuildCameraFrame(float3* origin, float3* corner, float3* u, float3* v,
 }
 
 #if 0 // TODO(LTE): Not used method. Delete.
-nanort::Ray<float> GenerateRay(const float3& origin, const float3& corner,
+nanort::Ray GenerateRay(const float3& origin, const float3& corner,
 															 const float3& du, const float3& dv, float u,
 															 float v) {
 	float3 dir;
@@ -212,7 +212,7 @@ nanort::Ray<float> GenerateRay(const float3& origin, const float3& corner,
 
 	float3 org;
 
-	nanort::Ray<float> ray;
+	nanort::Ray ray;
 	ray.org[0] = origin[0];
 	ray.org[1] = origin[1];
 	ray.org[2] = origin[2];
@@ -299,7 +299,7 @@ bool Renderer::Render(float* rgba, float* aux_rgba, int* sample_counts,
 				//}
 
 				for (int x = 0; x < config.width; x++) {
-					nanort::Ray<float> ray;
+					nanort::Ray ray;
 					ray.org[0] = origin[0];
 					ray.org[1] = origin[1];
 					ray.org[2] = origin[2];

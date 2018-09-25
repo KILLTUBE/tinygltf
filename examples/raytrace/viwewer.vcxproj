@@ -192,6 +192,7 @@
     <ClCompile Include="..\common\nativefiledialog\src\nfd_common.c" />
     <ClCompile Include="..\common\nativefiledialog\src\nfd_win.cpp" />
     <ClCompile Include="..\common\trackball.cc" />
+    <ClCompile Include="bvhaccel.cpp" />
     <ClCompile Include="gltf-loader.cc" />
     <ClCompile Include="main.cc" />
     <ClCompile Include="matrix.cc" />
