@@ -16,7 +16,7 @@ static std::string GetFilePathExtension(const std::string &FileName) {
 /// Loads glTF 2.0 mesh
 ///
 bool LoadGLTF(const std::string &filename, float scale,
-							std::vector<Mesh<float> > *meshes,
+							std::vector<Mesh> *meshes,
 							std::vector<Material> *materials,
 							std::vector<Texture> *textures) {
 	// TODO(syoyo): Texture
@@ -71,7 +71,7 @@ bool LoadGLTF(const std::string &filename, float scale,
 		//					<< " primitives:\n";
 
 		// Create a mesh object
-		Mesh<float> loadedMesh(sizeof(float) * 3);
+		Mesh loadedMesh(sizeof(float) * 3);
 
 		// To store the min and max of the buffer (as 3D vector of floats)
 		v3f pMin = {}, pMax = {};

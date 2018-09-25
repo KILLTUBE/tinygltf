@@ -126,7 +126,7 @@ static int LoadTexture(const std::string &filename,
 }
 
 static void ComputeBoundingBoxOfMesh(float bmin[3], float bmax[3],
-																		 const Mesh<float> &mesh) {
+																		 const Mesh &mesh) {
 	bmin[0] = bmin[1] = bmin[2] = std::numeric_limits<float>::max();
 	bmax[0] = bmax[1] = bmax[2] = -std::numeric_limits<float>::max();
 
@@ -142,7 +142,7 @@ static void ComputeBoundingBoxOfMesh(float bmin[3], float bmax[3],
 }
 
 bool LoadObj(const std::string &filename, float scale,
-						 std::vector<Mesh<float> > *meshes,
+						 std::vector<Mesh> *meshes,
 						 std::vector<Material> *out_materials,
 						 std::vector<Texture> *out_textures) {
 	tinyobj::attrib_t attrib;
@@ -213,7 +213,7 @@ bool LoadObj(const std::string &filename, float scale,
 	// TODO(LTE): Implement tangents and binormals
 
 	for (size_t i = 0; i < shapes.size(); i++) {
-		Mesh<float> mesh(/* stride */ sizeof(float) * 3);
+		Mesh mesh(/* stride */ sizeof(float) * 3);
 
 		mesh.name = shapes[i].name;
 

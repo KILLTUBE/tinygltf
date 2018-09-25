@@ -235,7 +235,7 @@ void FetchTexture(const Texture &texture, float u, float v, float* col) {
 
 bool Renderer::Render(float* rgba, float* aux_rgba, int* sample_counts,
 											float quat[4], 
-											const nanosg::Scene<float, Mesh<float>> &scene,
+											const nanosg::Scene<float, Mesh> &scene,
 											const Asset &asset,
 											const RenderConfig& config,
 											std::atomic<bool>& cancelFlag,
@@ -340,7 +340,7 @@ bool Renderer::Render(float* rgba, float* aux_rgba, int* sample_counts,
 
 						const std::vector<Material> &materials = asset.materials;
 						const std::vector<Texture> &textures = asset.textures;
-						const Mesh<float> &mesh = asset.meshes[isect.node_id];
+						const Mesh &mesh = asset.meshes[isect.node_id];
 			
 			//tigra: add default material
 			const Material &default_material = asset.default_material;

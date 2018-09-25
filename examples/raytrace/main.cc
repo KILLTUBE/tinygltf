@@ -117,9 +117,9 @@ bool gShowDepthPeseudoColor = true;
 float gCurrQuat[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 float gPrevQuat[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
-static nanosg::Scene<float, Mesh<float> > gScene;
+static nanosg::Scene<float, Mesh> gScene;
 static Asset gAsset;
-static std::vector<nanosg::Node<float, Mesh<float> > > gNodes;
+static std::vector<nanosg::Node<float, Mesh> > gNodes;
 
 std::atomic<bool> gRenderQuit;
 std::atomic<bool> gRenderRefresh;
@@ -576,7 +576,7 @@ void EditTransform(const ManipConfig &config, const Camera &camera,
 											 NULL, useSnap ? &snap.x : NULL);
 }
 
-void DrawMesh(const Mesh<float> *mesh) {
+void DrawMesh(const Mesh *mesh) {
 	// TODO(LTE): Use vertex array or use display list.
 
 	glBegin(GL_TRIANGLES);
@@ -622,7 +622,7 @@ void DrawMesh(const Mesh<float> *mesh) {
 	glEnd();
 }
 
-void DrawNode(const nanosg::Node<float, Mesh<float> > &node) {
+void DrawNode(const nanosg::Node<float, Mesh> &node) {
 	glPushMatrix();
 	glMultMatrixf(node.GetLocalXformPtr());
 
@@ -638,8 +638,7 @@ void DrawNode(const nanosg::Node<float, Mesh<float> > &node) {
 }
 
 // Draw scene with OpenGL
-void DrawScene(const nanosg::Scene<float, Mesh<float> > &scene,
-							 const Camera &camera) {
+void DrawScene(const nanosg::Scene<float, Mesh> &scene, const Camera &camera) {
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_LIGHTING);
@@ -657,8 +656,7 @@ void DrawScene(const nanosg::Scene<float, Mesh<float> > &scene,
 	glLightfv(GL_LIGHT1, GL_POSITION, &light1_pos[0]);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, &light_diffuse[0]);
 
-	const std::vector<nanosg::Node<float, Mesh<float> > > &root_nodes =
-			scene.GetNodes();
+	const std::vector<nanosg::Node<float, Mesh> > &root_nodes = scene.GetNodes();
 
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -684,7 +682,7 @@ void DrawScene(const nanosg::Scene<float, Mesh<float> > &scene,
 
 void BuildSceneItems(std::vector<std::string> *display_names,
 										 std::vector<std::string> *names,
-										 const nanosg::Node<float, Mesh<float> > &node,
+										 const nanosg::Node<float, Mesh> &node,
 										 int indent) {
 	if (node.GetName().empty()) {
 		// Skip a node with empty name.
@@ -729,7 +727,7 @@ int main(int argc, char **argv) {
 
 	// construct the scene
 	{
-		std::vector<Mesh<float> > meshes;
+		std::vector<Mesh> meshes;
 		std::vector<Material> materials;
 		std::vector<Texture> textures;
 
@@ -782,7 +780,7 @@ int main(int argc, char **argv) {
 		}
 
 		for (size_t n = 0; n < gAsset.meshes.size(); n++) {
-			nanosg::Node<float, Mesh<float> > node(&gAsset.meshes[n]);
+			nanosg::Node<float, Mesh> node(&gAsset.meshes[n]);
 
 			// case where the name of a mesh isn't defined in the loaded file
 			if (gAsset.meshes[n].name.empty()) {
@@ -816,7 +814,7 @@ int main(int argc, char **argv) {
 	std::vector<const char *> imgui_node_names;
 	std::vector<std::string> display_node_names;
 	std::vector<std::string> node_names;
-	std::map<int, nanosg::Node<float, Mesh<float> > *> node_map;
+	std::map<int, nanosg::Node<float, Mesh> *> node_map;
 
 	{
 		for (size_t i = 0; i < gScene.GetNodes().size(); i++) {
@@ -833,7 +831,7 @@ int main(int argc, char **argv) {
 
 		// Construct list index <-> Node ptr map.
 		for (size_t i = 0; i < node_names.size(); i++) {
-			nanosg::Node<float, Mesh<float> > *node;
+			nanosg::Node<float, Mesh> *node;
 
 			if (gScene.FindNode(node_names[i], &node)) {
 				// std::cout << "id : " << i << ", name : " << node_names[i] <<
