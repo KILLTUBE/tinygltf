@@ -52,50 +52,49 @@ class SpherePrimitive : PrimitiveInterface<SpherePrimitive> { public:
 };
 
 // 4x4 matrix
-template <typename T>
 class Matrix {
  public:
 	Matrix();
 	~Matrix();
 
-	static void Print(const T m[4][4]) {
+	static void Print(const float m[4][4]) {
 		for (int i = 0; i < 4; i++) {
 			printf("m[%d] = %f, %f, %f, %f\n", i, m[i][0], m[i][1], m[i][2], m[i][3]);
 		}
 	}
 
-	static void Identity(T m[4][4]) {
-		m[0][0] = static_cast<T>(1);
-		m[0][1] = static_cast<T>(0);
-		m[0][2] = static_cast<T>(0);
-		m[0][3] = static_cast<T>(0);
-		m[1][0] = static_cast<T>(0);
-		m[1][1] = static_cast<T>(1);
-		m[1][2] = static_cast<T>(0);
-		m[1][3] = static_cast<T>(0);
-		m[2][0] = static_cast<T>(0);
-		m[2][1] = static_cast<T>(0);
-		m[2][2] = static_cast<T>(1);
-		m[2][3] = static_cast<T>(0);
-		m[3][0] = static_cast<T>(0);
-		m[3][1] = static_cast<T>(0);
-		m[3][2] = static_cast<T>(0);
-		m[3][3] = static_cast<T>(1);
+	static void Identity(float m[4][4]) {
+		m[0][0] = 1.0f;
+		m[0][1] = 0.0f;
+		m[0][2] = 0.0f;
+		m[0][3] = 0.0f;
+		m[1][0] = 0.0f;
+		m[1][1] = 1.0f;
+		m[1][2] = 0.0f;
+		m[1][3] = 0.0f;
+		m[2][0] = 0.0f;
+		m[2][1] = 0.0f;
+		m[2][2] = 1.0f;
+		m[2][3] = 0.0f;
+		m[3][0] = 0.0f;
+		m[3][1] = 0.0f;
+		m[3][2] = 0.0f;
+		m[3][3] = 1.0f;
 	}
 
-	static void Copy(T dst[4][4], const T src[4][4]) {
-		memcpy(dst, src, sizeof(T) * 16);
+	static void Copy(float dst[4][4], const float src[4][4]) {
+		memcpy(dst, src, sizeof(float) * 16);
 	}
 
-	static void Inverse(T m[4][4]) {
+	static void Inverse(float m[4][4]) {
 		/*
 		 * codes from intel web
 		 * cramer's rule version
 		 */
 		int i, j;
-		T tmp[12];	/* tmp array for pairs */
-		T tsrc[16]; /* array of transpose source matrix */
-		T det;			/* determinant */
+		float tmp[12];	/* tmp array for pairs */
+		float tsrc[16]; /* array of transpose source matrix */
+		float det;			/* determinant */
 
 		/* transpose matrix */
 		for (i = 0; i < 4; i++) {
@@ -170,11 +169,10 @@ class Matrix {
 		m[3][3] -= tmp[8] * tsrc[9] + tmp[11] * tsrc[0] + tmp[5] * tsrc[8];
 
 		/* calculate determinant */
-		det = tsrc[0] * m[0][0] + tsrc[1] * m[0][1] + tsrc[2] * m[0][2] +
-					tsrc[3] * m[0][3];
+		det = tsrc[0] * m[0][0] + tsrc[1] * m[0][1] + tsrc[2] * m[0][2] + tsrc[3] * m[0][3];
 
 		/* calculate matrix inverse */
-		det = static_cast<T>(1.0) / det;
+		det = 1.0f / det;
 
 		for (j = 0; j < 4; j++) {
 			for (i = 0; i < 4; i++) {
@@ -183,8 +181,8 @@ class Matrix {
 		}
 	}
 
-	static void Transpose(T m[4][4]) {
-		T t[4][4];
+	static void Transpose(float m[4][4]) {
+		float t[4][4];
 
 		// Transpose
 		for (int j = 0; j < 4; j++) {
@@ -201,7 +199,7 @@ class Matrix {
 		}
 	}
 
-	static void Mult(T dst[4][4], const T m0[4][4], const T m1[4][4]) {
+	static void Mult(float dst[4][4], const float m0[4][4], const float m1[4][4]) {
 		for (int i = 0; i < 4; ++i) {
 			for (int j = 0; j < 4; ++j) {
 				dst[i][j] = 0;
@@ -212,8 +210,8 @@ class Matrix {
 		}
 	}
 
-	static void MultV(T dst[3], const T m[4][4], const T v[3]) {
-		T tmp[3];
+	static void MultV(float dst[3], const float m[4][4], const float v[3]) {
+		float tmp[3];
 		tmp[0] = m[0][0] * v[0] + m[1][0] * v[1] + m[2][0] * v[2] + m[3][0];
 		tmp[1] = m[0][1] * v[0] + m[1][1] * v[1] + m[2][1] * v[2] + m[3][1];
 		tmp[2] = m[0][2] * v[0] + m[1][2] * v[1] + m[2][2] * v[2] + m[3][2];
@@ -222,8 +220,8 @@ class Matrix {
 		dst[2] = tmp[2];
 	}
 
-	static void MultV(nanort::real3 &dst, const T m[4][4], const T v[3]) {
-		T tmp[3];
+	static void MultV(nanort::real3 &dst, const float m[4][4], const float v[3]) {
+		float tmp[3];
 		tmp[0] = m[0][0] * v[0] + m[1][0] * v[1] + m[2][0] * v[2] + m[3][0];
 		tmp[1] = m[0][1] * v[0] + m[1][1] * v[1] + m[2][1] * v[2] + m[3][1];
 		tmp[2] = m[0][2] * v[0] + m[1][2] * v[1] + m[2][2] * v[2] + m[3][2];
@@ -232,9 +230,6 @@ class Matrix {
 		dst[2] = tmp[2];
 	}
 };
-
-// typedef Matrix<float> Matrixf;
-// typedef Matrix<double> Matrixd;
 
 static void XformBoundingBox(float xbmin[3],	// out
 														 float xbmax[3],	// out
@@ -270,7 +265,7 @@ static void XformBoundingBox(float xbmin[3],	// out
 
 	float xb[8][3];
 	for (int i = 0; i < 8; i++) {
-		Matrix<float>::MultV(xb[i], m, b[i]);
+		Matrix::MultV(xb[i], m, b[i]);
 	}
 
 	xbmin[0] = xb[0][0];
@@ -316,23 +311,23 @@ class Node {
 		lbmin_[0] = lbmin_[1] = lbmin_[2] = std::numeric_limits<float>::max();
 		lbmax_[0] = lbmax_[1] = lbmax_[2] = -std::numeric_limits<float>::max();
 
-		Matrix<float>::Identity(local_xform_);
-		Matrix<float>::Identity(xform_);
-		Matrix<float>::Identity(inv_xform_);
-		Matrix<float>::Identity(inv_xform33_);
+		Matrix::Identity(local_xform_);
+		Matrix::Identity(xform_);
+		Matrix::Identity(inv_xform_);
+		Matrix::Identity(inv_xform33_);
 		inv_xform33_[3][3] = 0.0f;
-		Matrix<float>::Identity(inv_transpose_xform33_);
+		Matrix::Identity(inv_transpose_xform33_);
 		inv_transpose_xform33_[3][3] = 0.0f;
 	}
 
 	~Node() {}
 
 	void Copy(const type &rhs) {
-		Matrix<float>::Copy(local_xform_, rhs.local_xform_);
-		Matrix<float>::Copy(xform_, rhs.xform_);
-		Matrix<float>::Copy(inv_xform_, rhs.inv_xform_);
-		Matrix<float>::Copy(inv_xform33_, rhs.inv_xform33_);
-		Matrix<float>::Copy(inv_transpose_xform33_, rhs.inv_transpose_xform33_);
+		Matrix::Copy(local_xform_, rhs.local_xform_);
+		Matrix::Copy(xform_, rhs.xform_);
+		Matrix::Copy(inv_xform_, rhs.inv_xform_);
+		Matrix::Copy(inv_xform33_, rhs.inv_xform33_);
+		Matrix::Copy(inv_transpose_xform33_, rhs.inv_transpose_xform33_);
 
 		lbmin_[0] = rhs.lbmin_[0];
 		lbmin_[1] = rhs.lbmin_[1];
@@ -402,25 +397,25 @@ class Node {
 		}
 
 		// xform = parent_xform x local_xform
-		Matrix<float>::Mult(xform_, parent_xform, local_xform_);
+		Matrix::Mult(xform_, parent_xform, local_xform_);
 
 		// Compute the bounding box in world coordinate.
 		XformBoundingBox(xbmin_, xbmax_, lbmin_, lbmax_, xform_);
 
 		// Inverse(xform)
-		Matrix<float>::Copy(inv_xform_, xform_);
-		Matrix<float>::Inverse(inv_xform_);
+		Matrix::Copy(inv_xform_, xform_);
+		Matrix::Inverse(inv_xform_);
 
 		// Clear translation, then inverse(xform)
-		Matrix<float>::Copy(inv_xform33_, xform_);
+		Matrix::Copy(inv_xform33_, xform_);
 		inv_xform33_[3][0] = 0.0f;
 		inv_xform33_[3][1] = 0.0f;
 		inv_xform33_[3][2] = 0.0f;
-		Matrix<float>::Inverse(inv_xform33_);
+		Matrix::Inverse(inv_xform33_);
 
 		// Inverse transpose of xform33
-		Matrix<float>::Copy(inv_transpose_xform33_, inv_xform33_);
-		Matrix<float>::Transpose(inv_transpose_xform33_);
+		Matrix::Copy(inv_transpose_xform33_, inv_xform33_);
+		Matrix::Transpose(inv_transpose_xform33_);
 
 		// Update children nodes
 		for (size_t i = 0; i < children_.size(); i++) {
@@ -493,9 +488,8 @@ class Node {
 // -------------------------------------------------
 
 // Predefined SAH predicator for cube.
-template <typename T, class M>
-class NodeBBoxPred {
- public:
+template <class M>
+class NodeBBoxPred { public:
 	NodeBBoxPred(const std::vector<Node<M> > *nodes)
 			: axis_(0), pos_(0.0f), nodes_(nodes) {}
 
@@ -508,11 +502,11 @@ class NodeBBoxPred {
 		int axis = axis_;
 		float pos = pos_;
 
-		T bmin[3], bmax[3];
+		float bmin[3], bmax[3];
 
 		(*nodes_)[i].GetWorldBoundingBox(bmin, bmax);
 
-		T center = bmax[axis] - bmin[axis];
+		float center = bmax[axis] - bmin[axis];
 
 		return (center < pos);
 	}
@@ -523,7 +517,7 @@ class NodeBBoxPred {
 	const std::vector<Node<M> > *nodes_;
 };
 
-template <typename T, class M>
+template <class M>
 class NodeBBoxGeometry {
  public:
 	NodeBBoxGeometry(const std::vector<Node<M> > *nodes) : nodes_(nodes) {}
@@ -531,7 +525,7 @@ class NodeBBoxGeometry {
 	/// Compute bounding box for `prim_index`th cube.
 	/// This function is called for each primitive in BVH build.
 	void BoundingBox(nanort::real3 *bmin, nanort::real3 *bmax, unsigned int prim_index) const {
-		T a[3], b[3];
+		float a[3], b[3];
 		(*nodes_)[prim_index].GetWorldBoundingBox(a, b);
 		(*bmin)[0] = a[0];
 		(*bmin)[1] = a[1];
@@ -683,14 +677,14 @@ class Scene {
 		// Update nodes.
 		for (size_t i = 0; i < nodes_.size(); i++) {
 			float ident[4][4];
-			Matrix<float>::Identity(ident);
+			Matrix::Identity(ident);
 
 			nodes_[i].Update(ident);
 		}
 
 		// Build toplevel BVH.
-		NodeBBoxGeometry<float, M> geom(&nodes_);
-		NodeBBoxPred<float, M> pred(&nodes_);
+		NodeBBoxGeometry<M> geom(&nodes_);
+		NodeBBoxPred<M> pred(&nodes_);
 
 		// FIXME(LTE): Limit one leaf contains one node bbox primitive. This would
 		// work, but would be inefficient.
@@ -778,8 +772,8 @@ class Scene {
 				// Transform ray into node's local space
 				// TODO(LTE): Set ray tmin and tmax
 				nanort::Ray local_ray;
-				Matrix<float>::MultV(local_ray.org, node.inv_xform_, ray.org);
-				Matrix<float>::MultV(local_ray.dir, node.inv_xform33_, ray.dir);
+				Matrix::MultV(local_ray.org, node.inv_xform_, ray.org);
+				Matrix::MultV(local_ray.dir, node.inv_xform33_, ray.dir);
 
 				nanort::TriangleIntersector<H> triangle_intersector(
 						node.GetMesh()->vertices.data(), node.GetMesh()->faces.data(),
@@ -797,7 +791,7 @@ class Scene {
 					local_P[2] = local_ray.org[2] + local_isect.t * local_ray.dir[2];
 
 					float world_P[3];
-					Matrix<float>::MultV(world_P, node.xform_, local_P);
+					Matrix::MultV(world_P, node.xform_, local_P);
 
 					nanort::real3 po;
 					po[0] = world_P[0] - ray.org[0];
@@ -824,9 +818,9 @@ class Scene {
 
 						// Convert position and normal into world coordinate.
 						isect->t = t_world;
-						Matrix<float>::MultV(isect->P, node.xform_, local_P);
-						Matrix<float>::MultV(isect->Ng, node.inv_transpose_xform33_, Ng);
-						Matrix<float>::MultV(isect->Ns, node.inv_transpose_xform33_, Ns);
+						Matrix::MultV(isect->P, node.xform_, local_P);
+						Matrix::MultV(isect->Ng, node.inv_transpose_xform33_, Ng);
+						Matrix::MultV(isect->Ns, node.inv_transpose_xform33_, Ns);
 					}
 				}
 			}
