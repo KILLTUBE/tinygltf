@@ -378,7 +378,6 @@ class Ray {
 	int dir_sign[3];	// filled internally
 };
 
-template <typename T = float>
 class BVHNode {
  public:
 	BVHNode() {}
@@ -416,8 +415,8 @@ class BVHNode {
 
 	~BVHNode() {}
 
-	T bmin[3];
-	T bmax[3];
+	float bmin[3];
+	float bmax[3];
 
 	int flag;	// 1 = leaf node, 0 = branch node
 	int axis;
@@ -603,7 +602,7 @@ class BVHAccel {
 														 const I &intersector,
 														 StackVector<NodeHit<T>, 128> *hits) const;
 
-	const std::vector<BVHNode<T> > &GetNodes() const { return nodes_; }
+	const std::vector<BVHNode> &GetNodes() const { return nodes_; }
 	const std::vector<unsigned int> &GetIndices() const { return indices_; }
 
 	///
@@ -638,7 +637,7 @@ class BVHAccel {
 
 	/// Builds shallow BVH tree recursively.
 	template <class P, class Pred>
-	unsigned int BuildShallowTree(std::vector<BVHNode<T> > *out_nodes,
+	unsigned int BuildShallowTree(std::vector<BVHNode> *out_nodes,
 																unsigned int left_idx, unsigned int right_idx,
 																unsigned int depth,
 																unsigned int max_shallow_depth, const P &p,
@@ -648,17 +647,17 @@ class BVHAccel {
 	/// Builds BVH tree recursively.
 	template <class P, class Pred>
 	unsigned int BuildTree(BVHBuildStatistics *out_stat,
-												 std::vector<BVHNode<T> > *out_nodes,
+												 std::vector<BVHNode> *out_nodes,
 												 unsigned int left_idx, unsigned int right_idx,
 												 unsigned int depth, const P &p, const Pred &pred);
 
 	template <class I>
-	bool TestLeafNode(const BVHNode<T> &node, const Ray<T> &ray,
+	bool TestLeafNode(const BVHNode &node, const Ray<T> &ray,
 										const I &intersector) const;
 
 	template <class I>
 	bool TestLeafNodeIntersections(
-			const BVHNode<T> &node, const Ray<T> &ray, const int max_intersections,
+			const BVHNode &node, const Ray<T> &ray, const int max_intersections,
 			const I &intersector,
 			std::priority_queue<NodeHit<T>, std::vector<NodeHit<T> >,
 													NodeHitComparator<T> > *isect_pq) const;
@@ -667,11 +666,11 @@ class BVHAccel {
 	template<class I, class H, class Comp>
 	bool MultiHitTestLeafNode(std::priority_queue<H, std::vector<H>, Comp> *isect_pq,
 														int max_intersections,
-														const BVHNode<T> &node, const Ray<T> &ray,
+														const BVHNode &node, const Ray<T> &ray,
 														const I &intersector) const;
 #endif
 
-	std::vector<BVHNode<T> > nodes_;
+	std::vector<BVHNode> nodes_;
 	std::vector<unsigned int> indices_;	// max 4G triangles.
 	std::vector<BBox<T> > bboxes_;
 	BVHBuildOptions<T> options_;
@@ -1343,7 +1342,7 @@ inline void GetBoundingBox(real3 *bmin, real3 *bmax,
 #if NANORT_ENABLE_PARALLEL_BUILD
 template <typename T>
 template <class P, class Pred>
-unsigned int BVHAccel<T>::BuildShallowTree(std::vector<BVHNode<T> > *out_nodes,
+unsigned int BVHAccel<T>::BuildShallowTree(std::vector<BVHNode> *out_nodes,
 																					 unsigned int left_idx,
 																					 unsigned int right_idx,
 																					 unsigned int depth,
@@ -1364,7 +1363,7 @@ unsigned int BVHAccel<T>::BuildShallowTree(std::vector<BVHNode<T> > *out_nodes,
 	if ((n <= options_.min_leaf_primitives) ||
 			(depth >= options_.max_tree_depth)) {
 		// Create leaf node.
-		BVHNode<T> leaf;
+		BVHNode leaf;
 
 		leaf.bmin[0] = bmin[0];
 		leaf.bmin[1] = bmin[1];
@@ -1399,7 +1398,7 @@ unsigned int BVHAccel<T>::BuildShallowTree(std::vector<BVHNode<T> > *out_nodes,
 		shallow_node_infos_.push_back(info);
 
 		// Add dummy node.
-		BVHNode<T> node;
+		BVHNode node;
 		node.axis = -1;
 		node.flag = -1;
 		out_nodes->push_back(node);
@@ -1455,7 +1454,7 @@ unsigned int BVHAccel<T>::BuildShallowTree(std::vector<BVHNode<T> > *out_nodes,
 			}
 		}
 
-		BVHNode<T> node;
+		BVHNode node;
 		node.axis = cut_axis;
 		node.flag = 0;	// 0 = branch
 
@@ -1491,7 +1490,7 @@ unsigned int BVHAccel<T>::BuildShallowTree(std::vector<BVHNode<T> > *out_nodes,
 template <typename T>
 template <class P, class Pred>
 unsigned int BVHAccel<T>::BuildTree(BVHBuildStatistics *out_stat,
-																		std::vector<BVHNode<T> > *out_nodes,
+																		std::vector<BVHNode> *out_nodes,
 																		unsigned int left_idx,
 																		unsigned int right_idx, unsigned int depth,
 																		const P &p, const Pred &pred) {
@@ -1514,7 +1513,7 @@ unsigned int BVHAccel<T>::BuildTree(BVHBuildStatistics *out_stat,
 	if ((n <= options_.min_leaf_primitives) ||
 			(depth >= options_.max_tree_depth)) {
 		// Create leaf node.
-		BVHNode<T> leaf;
+		BVHNode leaf;
 
 		leaf.bmin[0] = bmin[0];
 		leaf.bmin[1] = bmin[1];
@@ -1587,7 +1586,7 @@ unsigned int BVHAccel<T>::BuildTree(BVHBuildStatistics *out_stat,
 		}
 	}
 
-	BVHNode<T> node;
+	BVHNode node;
 	node.axis = cut_axis;
 	node.flag = 0;	// 0 = branch
 
@@ -1698,7 +1697,7 @@ bool BVHAccel<T>::Build(unsigned int num_primitives, const P &p,
 		assert(shallow_node_infos_.size() > 0);
 
 		// Build deeper tree in parallel
-		std::vector<std::vector<BVHNode<T> > > local_nodes(
+		std::vector<std::vector<BVHNode>> local_nodes(
 				shallow_node_infos_.size());
 		std::vector<BVHBuildStatistics> local_stats(shallow_node_infos_.size());
 
@@ -1790,7 +1789,7 @@ bool BVHAccel<T>::Dump(const char *filename) {
 	r = fwrite(&numNodes, sizeof(size_t), 1, fp);
 	assert(r == 1);
 
-	r = fwrite(&nodes_.at(0), sizeof(BVHNode<T>), numNodes, fp);
+	r = fwrite(&nodes_.at(0), sizeof(BVHNode), numNodes, fp);
 	assert(r == numNodes);
 
 	r = fwrite(&numIndices, sizeof(size_t), 1, fp);
@@ -1821,7 +1820,7 @@ bool BVHAccel<T>::Load(const char *filename) {
 	assert(numNodes > 0);
 
 	nodes_.resize(numNodes);
-	r = fread(&nodes_.at(0), sizeof(BVHNode<T>), numNodes, fp);
+	r = fread(&nodes_.at(0), sizeof(BVHNode), numNodes, fp);
 	assert(r == numNodes);
 
 	r = fread(&numIndices, sizeof(size_t), 1, fp);
@@ -1881,7 +1880,7 @@ inline bool IntersectRayAABB(T *tminOut,	// [out]
 
 template <typename T>
 template <class I>
-inline bool BVHAccel<T>::TestLeafNode(const BVHNode<T> &node, const Ray<T> &ray,
+inline bool BVHAccel<T>::TestLeafNode(const BVHNode &node, const Ray<T> &ray,
 																			const I &intersector) const {
 	bool hit = false;
 
@@ -1921,7 +1920,7 @@ template <typename T> template<class I, class H, class Comp>
 bool BVHAccel<T>::MultiHitTestLeafNode(
 	std::priority_queue<H, std::vector<H>, Comp>	*isect_pq,
 	int max_intersections,
-	const BVHNode<T> &node,
+	const BVHNode &node,
 	const Ray<T> &ray,
 	const I &intersector) const {
 	bool hit = false;
@@ -2028,7 +2027,7 @@ bool BVHAccel<T>::Traverse(const Ray<T> &ray, const I &intersector, H *isect,
 
 	while (node_stack_index >= 0) {
 		unsigned int index = node_stack[node_stack_index];
-		const BVHNode<T> &node = nodes_[index];
+		const BVHNode &node = nodes_[index];
 
 		node_stack_index--;
 
@@ -2064,7 +2063,7 @@ bool BVHAccel<T>::Traverse(const Ray<T> &ray, const I &intersector, H *isect,
 template <typename T>
 template <class I>
 inline bool BVHAccel<T>::TestLeafNodeIntersections(
-		const BVHNode<T> &node, const Ray<T> &ray, const int max_intersections,
+		const BVHNode &node, const Ray<T> &ray, const int max_intersections,
 		const I &intersector,
 		std::priority_queue<NodeHit<T>, std::vector<NodeHit<T> >,
 												NodeHitComparator<T> > *isect_pq) const {
@@ -2155,7 +2154,7 @@ bool BVHAccel<T>::ListNodeIntersections(
 	T min_t, max_t;
 	while (node_stack_index >= 0) {
 		unsigned int index = node_stack[node_stack_index];
-		const BVHNode<T> &node = nodes_[static_cast<size_t>(index)];
+		const BVHNode &node = nodes_[static_cast<size_t>(index)];
 
 		node_stack_index--;
 
@@ -2243,7 +2242,7 @@ bool BVHAccel<T>::MultiHitTraverse(const Ray<T> &ray,
 	T min_t, max_t;
 	while (node_stack_index >= 0) {
 		unsigned int index = node_stack[node_stack_index];
-		const BVHNode<T> &node = nodes_[static_cast<size_t>(index)];
+		const BVHNode &node = nodes_[static_cast<size_t>(index)];
 
 		node_stack_index--;
 
