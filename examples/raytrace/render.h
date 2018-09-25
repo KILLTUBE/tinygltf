@@ -1,7 +1,7 @@
 #ifndef EXAMPLE_RENDER_H_
 #define EXAMPLE_RENDER_H_
 
-#include <atomic>  // C++11
+#include <atomic>	// C++11
 
 //mode definitions now here 
 
@@ -20,26 +20,25 @@
 namespace example {
 
 struct Asset {
-  std::vector<Mesh<float> > meshes;
-  std::vector<Material> materials;
-  
-  //tigra: add default material
-  Material default_material;
-  std::vector<Texture> textures;
+	std::vector<Mesh<float> > meshes;
+	std::vector<Material> materials;
+	
+	//tigra: add default material
+	Material default_material;
+	std::vector<Texture> textures;
 };
 
-class Renderer {
- public:
-  Renderer() {}
-  ~Renderer() {}
+class Renderer { public:
+	Renderer() {}
+	~Renderer() {}
 
-  /// Returns false when the rendering was canceled.
-  static bool Render(float* rgba, float* aux_rgba, int *sample_counts, float quat[4],
-              const nanosg::Scene<float, Mesh<float>> &scene, const Asset &asset, const RenderConfig& config,
-                     std::atomic<bool>& cancel_flag,
-                     int& _showBufferMode
-                    );
+	/// Returns false when the rendering was canceled.
+	static bool Render(float* rgba, float* aux_rgba, int *sample_counts, float quat[4],
+							const nanosg::Scene<float, Mesh<float>> &scene, const Asset &asset, const RenderConfig& config,
+										 std::atomic<bool>& cancel_flag,
+										 int& _showBufferMode
+										);
 };
 };
 
-#endif  // EXAMPLE_RENDER_H_
+#endif	// EXAMPLE_RENDER_H_
