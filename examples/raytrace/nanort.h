@@ -507,21 +507,20 @@ class BBox {
 	}
 };
 
-template <typename T>
 class NodeHit {
  public:
 	NodeHit()
-			: t_min(std::numeric_limits<T>::max()),
-				t_max(-std::numeric_limits<T>::max()),
+			: t_min(std::numeric_limits<float>::max()),
+				t_max(-std::numeric_limits<float>::max()),
 				node_id(static_cast<unsigned int>(-1)) {}
 
-	NodeHit(const NodeHit<T> &rhs) {
+	NodeHit(const NodeHit &rhs) {
 		t_min = rhs.t_min;
 		t_max = rhs.t_max;
 		node_id = rhs.node_id;
 	}
 
-	NodeHit &operator=(const NodeHit<T> &rhs) {
+	NodeHit &operator=(const NodeHit &rhs) {
 		t_min = rhs.t_min;
 		t_max = rhs.t_max;
 		node_id = rhs.node_id;
@@ -531,15 +530,15 @@ class NodeHit {
 
 	~NodeHit() {}
 
-	T t_min;
-	T t_max;
+	float t_min;
+	float t_max;
 	unsigned int node_id;
 };
 
 template <typename T>
 class NodeHitComparator {
  public:
-	inline bool operator()(const NodeHit<T> &a, const NodeHit<T> &b) {
+	inline bool operator()(const NodeHit &a, const NodeHit &b) {
 		return a.t_min < b.t_min;
 	}
 };
@@ -600,7 +599,7 @@ class BVHAccel {
 	template <class I>
 	bool ListNodeIntersections(const Ray<T> &ray, int max_intersections,
 														 const I &intersector,
-														 StackVector<NodeHit<T>, 128> *hits) const;
+														 StackVector<NodeHit, 128> *hits) const;
 
 	const std::vector<BVHNode> &GetNodes() const { return nodes_; }
 	const std::vector<unsigned int> &GetIndices() const { return indices_; }
@@ -659,7 +658,7 @@ class BVHAccel {
 	bool TestLeafNodeIntersections(
 			const BVHNode &node, const Ray<T> &ray, const int max_intersections,
 			const I &intersector,
-			std::priority_queue<NodeHit<T>, std::vector<NodeHit<T> >,
+			std::priority_queue<NodeHit, std::vector<NodeHit>,
 													NodeHitComparator<T> > *isect_pq) const;
 
 #if 0
@@ -2065,7 +2064,7 @@ template <class I>
 inline bool BVHAccel<T>::TestLeafNodeIntersections(
 		const BVHNode &node, const Ray<T> &ray, const int max_intersections,
 		const I &intersector,
-		std::priority_queue<NodeHit<T>, std::vector<NodeHit<T> >,
+		std::priority_queue<NodeHit, std::vector<NodeHit>,
 												NodeHitComparator<T> > *isect_pq) const {
 	bool hit = false;
 
@@ -2090,7 +2089,7 @@ inline bool BVHAccel<T>::TestLeafNodeIntersections(
 		T min_t, max_t;
 		if (intersector.Intersect(&min_t, &max_t, prim_idx)) {
 			// Always add to isect lists.
-			NodeHit<T> isect;
+			NodeHit isect;
 			isect.t_min = min_t;
 			isect.t_max = max_t;
 			isect.node_id = prim_idx;
@@ -2116,7 +2115,7 @@ template <typename T>
 template <class I>
 bool BVHAccel<T>::ListNodeIntersections(
 		const Ray<T> &ray, int max_intersections, const I &intersector,
-		StackVector<NodeHit<T>, 128> *hits) const {
+		StackVector<NodeHit, 128> *hits) const {
 	const int kMaxStackDepth = 512;
 
 	T hit_t = ray.max_t;
@@ -2126,8 +2125,7 @@ bool BVHAccel<T>::ListNodeIntersections(
 	node_stack[0] = 0;
 
 	// Stores furthest intersection at top
-	std::priority_queue<NodeHit<T>, std::vector<NodeHit<T> >,
-											NodeHitComparator<T> >
+	std::priority_queue<NodeHit, std::vector<NodeHit>, NodeHitComparator<T> >
 			isect_pq;
 
 	(*hits)->clear();
@@ -2187,7 +2185,7 @@ bool BVHAccel<T>::ListNodeIntersections(
 		size_t n = isect_pq.size();
 		(*hits)->resize(n);
 		for (size_t i = 0; i < n; i++) {
-			const NodeHit<T> &isect = isect_pq.top();
+			const NodeHit &isect = isect_pq.top();
 			(*hits)[n - i - 1] = isect;
 			isect_pq.pop();
 		}

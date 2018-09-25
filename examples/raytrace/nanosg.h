@@ -756,7 +756,7 @@ class Scene {
 		bool has_hit = false;
 
 		NodeBBoxIntersector<T, M> isector(&nodes_);
-		nanort::StackVector<nanort::NodeHit<T>, 128> node_hits;
+		nanort::StackVector<nanort::NodeHit, 128> node_hits;
 		bool may_hit = toplevel_accel_.ListNodeIntersections(ray, kMaxIntersections,
 																												 isector, &node_hits);
 
